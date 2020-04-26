@@ -12,6 +12,7 @@
 
     <properties>
         <junit.version>4.12</junit.version>
+        <project.version>0.1-SNAPSHOT</project.version>
     </properties>
 
     <dependencies>

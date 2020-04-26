@@ -34,6 +34,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static threeguys.http.signing.RequestSigning.*;
+
 public class HttpVerifier {
 
     private final RequestSigning signing;
@@ -104,15 +106,21 @@ public class HttpVerifier {
         return fields;
     }
 
-    public void verify(String method, String url, HeaderProvider provider, String signatureValue) throws SignatureException {
+    public VerificationResult verify(String method, String url, HeaderProvider provider) throws SignatureException {
         try {
+            String [] signatureValues = provider.get(HEADER);
+            if (signatureValues == null || signatureValues.length == 0) {
+                throw new InvalidSignatureException("Could not find header \"" + HEADER + "\"");
+            }
+            String signatureValue = signatureValues[0];
+
             Map<String, String> fields = parseFields(signatureValue);
 
-            List<String> headers = Arrays.asList(fields.get(RequestSigning.FIELD_HEADERS).split(" "));
+            List<String> headers = Arrays.asList(fields.get(FIELD_HEADERS).split(" "));
 
             // Validate the timestamps in the signature
-            long created = Long.parseLong(fields.get(RequestSigning.FIELD_CREATED));
-            long expires = Long.parseLong(fields.get(RequestSigning.FIELD_EXPIRES));
+            long created = Long.parseLong(fields.get(FIELD_CREATED));
+            long expires = Long.parseLong(fields.get(FIELD_EXPIRES));
 
             long now = Instant.now().getEpochSecond();
             long checkCreate = now - maxCreateAgeSec;
@@ -127,10 +135,10 @@ public class HttpVerifier {
 
             // Check the key parameters
             // these will throw exceptions if the values are not found
-            String algorithm = fields.get(RequestSigning.FIELD_ALGORITHM);
+            String algorithm = fields.get(FIELD_ALGORITHM);
             Signature signature = signing.getSignature(algorithm);
 
-            String keyId = fields.get(RequestSigning.FIELD_KEY_ID);
+            String keyId = fields.get(FIELD_KEY_ID);
             PublicKey key = keyProvider.get(keyId);
 
             // Verify the signature
@@ -139,12 +147,13 @@ public class HttpVerifier {
             byte [] payload = signing.assemblePayload(method, url, headers, provider, created);
             signature.update(payload);
 
-            byte [] data = Base64.getDecoder().decode(fields.get(RequestSigning.FIELD_SIGNATURE));
+            byte [] data = Base64.getDecoder().decode(fields.get(FIELD_SIGNATURE));
             if (!signature.verify(data)) {
                 throw new InvalidSignatureException("The signature was not verified");
             }
 
             // Woot! we're good!
+            return new VerificationResult(key, fields);
 
         } catch (Exception e) {
             if (e instanceof SignatureException) {

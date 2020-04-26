@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.*;
+
 @RunWith(Parameterized.class)
 public class TestHttpVerifier {
 
@@ -58,10 +60,10 @@ public class TestHttpVerifier {
         return Arrays.asList(new Object[][] {
                 { "rsa-sha256", "RSA", 2048 },
                 { "rsa-sha384", "RSA", 2048 },
-                { "rsa-sha512", "RSA", 4096 },
-                { "ecdsa-sha256", "EC", 512 },
-                { "ecdsa-sha384", "EC", 512 },
-                { "ecdsa-sha512", "EC", 512 },
+                { "rsa-sha512", "RSA", 2048 },
+                { "ecdsa-sha256", "EC", 256 },
+                { "ecdsa-sha384", "EC", 384 },
+                { "ecdsa-sha512", "EC", 571 },
         });
     }
 
@@ -85,7 +87,7 @@ public class TestHttpVerifier {
 
         PrivateKey key = pair.getPrivate();
         List<String> headers = Arrays.asList(RequestSigning.HEADER_REQUEST_TARGET, RequestSigning.HEADER_CREATED, "foo", "bar", "baz");
-        HttpSigner signer = new HttpSigner(algorithm, "test-key", key, headers, signing, 300);
+        HttpSigner signer = new HttpSigner(algorithm, "test-key", (n) -> key, headers, signing, 300);
 
         Map<String, String[]> data = new HashMap<>();
         data.put("foo", new String[] { "foo value" });
@@ -95,8 +97,11 @@ public class TestHttpVerifier {
 
         String sig = signer.sign("GET", "/yo/mom", provider);
 
+        data.put(RequestSigning.HEADER, new String[] { sig });
+
         HttpVerifier verifier = new HttpVerifier(signing, (n) -> pair.getPublic());
-        verifier.verify("GET", "/yo/mom", provider, sig);
+        VerificationResult result = verifier.verify("GET", "/yo/mom", provider);
+        assertNotNull(result);
     }
 
 }
