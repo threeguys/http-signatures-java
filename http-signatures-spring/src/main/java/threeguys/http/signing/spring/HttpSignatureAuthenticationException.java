@@ -15,9 +15,7 @@
  */
 package threeguys.http.signing.spring;
 
-import org.springframework.security.core.AuthenticationException;
-
-public class HttpSignatureAuthenticationException extends AuthenticationException {
+public class HttpSignatureAuthenticationException extends Exception {
 
     public HttpSignatureAuthenticationException(String msg, Throwable t) {
         super(msg, t);

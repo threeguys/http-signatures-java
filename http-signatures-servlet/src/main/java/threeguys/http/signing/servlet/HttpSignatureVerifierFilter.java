@@ -91,24 +91,33 @@ public class HttpSignatureVerifierFilter implements Filter {
         }
     }
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public boolean doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
         if (servletRequest instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
-            HttpServletResponse response = (HttpServletResponse) servletResponse;
 
             HttpServletRequestHeaderProvider provider = new HttpServletRequestHeaderProvider(request);
             try {
                 verifier.verify(request.getMethod(), request.getPathInfo(), provider);
             } catch (SignatureException e) {
-                response.sendError(UNAUTHORIZED_CODE, UNAUTHORIZED_MESSAGE);
-                return;
+                return false;
             }
-
-            filterChain.doFilter(servletRequest, servletResponse);
-
         } else {
             throw new ServletException("Invalid request, cannot process " + servletRequest.getClass().getName());
+        }
+
+        return true;
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        if (!doFilter(servletRequest, servletResponse)) {
+            HttpServletResponse response = (HttpServletResponse) servletResponse;
+            response.sendError(UNAUTHORIZED_CODE, UNAUTHORIZED_MESSAGE);
+            return;
+        }
+
+        if (filterChain != null) {
+            filterChain.doFilter(servletRequest, servletResponse);
         }
     }
 

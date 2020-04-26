@@ -15,6 +15,11 @@
     <version>${project.version}</version>
     <packaging>jar</packaging>
 
+    <properties>
+        <javax.servlet.version>3.1.0</javax.servlet.version>
+        <spring.security.version>5.3.1.RELEASE</spring.security.version>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -24,34 +29,34 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>5.3.1.RELEASE</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>5.3.1.RELEASE</version>
+            <groupId>threeguys.http.signatures</groupId>
+            <artifactId>http-signatures-servlet</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>5.2.5.RELEASE</version>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.2.5.RELEASE</version>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>${javax.servlet.version}</version>
             <scope>provided</scope>
         </dependency>
 
