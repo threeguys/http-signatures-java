@@ -91,13 +91,13 @@ public class HttpSignatureVerifierFilter implements Filter {
         }
     }
 
-    public boolean doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+    public boolean doFilter(ServletRequest servletRequest) throws ServletException {
         if (servletRequest instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
 
             HttpServletRequestHeaderProvider provider = new HttpServletRequestHeaderProvider(request);
             try {
-                verifier.verify(request.getMethod(), request.getPathInfo(), provider);
+                verifier.verify(request.getMethod(), request.getRequestURI(), provider);
             } catch (SignatureException e) {
                 return false;
             }
@@ -110,7 +110,7 @@ public class HttpSignatureVerifierFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (!doFilter(servletRequest, servletResponse)) {
+        if (!doFilter(servletRequest)) {
             HttpServletResponse response = (HttpServletResponse) servletResponse;
             response.sendError(UNAUTHORIZED_CODE, UNAUTHORIZED_MESSAGE);
             return;
