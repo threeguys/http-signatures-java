@@ -41,19 +41,29 @@ import static threeguys.http.signing.RequestSigning.FIELD_SIGNATURE;
 public class HttpSigner {
 
     private final String algorithm;
-    private final String keyId;
+    private String keyId;
     private final KeyProvider<PrivateKey> privateKey;
     private final List<String> headers;
     private final RequestSigning signing;
     private final int expirationSec;
 
-    public HttpSigner(String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, List<String> headers, RequestSigning signing, int expirationSec) {
+    private String algorithmValue;
+    private String headersValue;
+
+    public HttpSigner(String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, List<String> headers, RequestSigning signing, int expirationSec) throws InvalidSignatureException {
         this.algorithm = algorithm;
         this.keyId = keyId;
         this.privateKey = privateKey;
         this.headers = headers;
         this.signing = signing;
         this.expirationSec = expirationSec;
+
+        // These are just optimizations
+        this.algorithmValue = makeValue(algorithm);
+        this.headersValue = makeValue(headers.stream()
+                .map(String::toLowerCase)
+                .map(String::trim)
+                .collect(Collectors.joining(" ")));
     }
 
     private String makeValue(String value) throws InvalidSignatureException {
@@ -75,21 +85,33 @@ public class HttpSigner {
         }
     }
 
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+
     public String sign(String method, String url, HeaderProvider provider) throws InvalidSignatureException {
         try {
+            String reqKeyId = this.keyId; // just so it doesn't switch out while we're processing
+            PrivateKey key = privateKey.get(reqKeyId);
+
             long created = Instant.now().getEpochSecond();
             byte [] payload = signing.assemblePayload(method, url, headers, provider, created);
-            String encodedSig = signPayload(algorithm, privateKey.get(keyId), payload);
+
+            // Create the signature
+            Signature signature = signing.getSignature(algorithm);
+            signature.initSign(key);
+            signature.update(payload);
+            String encodedSig = Base64.getEncoder().encodeToString(signature.sign());
 
             List<String> output = new ArrayList<>();
             for (String f : signing.getFields()) {
                 String value;
                 switch(f) {
                     case FIELD_ALGORITHM :
-                        value = makeValue(algorithm);
+                        value = algorithmValue;
                         break;
                     case FIELD_KEY_ID:
-                        value = makeValue(keyId);
+                        value = makeValue(reqKeyId);
                         break;
                     case FIELD_CREATED:
                         value = Long.toString(created);
@@ -98,10 +120,7 @@ public class HttpSigner {
                         value = Long.toString(created + expirationSec);
                         break;
                     case FIELD_HEADERS:
-                        value = makeValue(headers.stream()
-                                .map(String::toLowerCase)
-                                .map(String::trim)
-                                .collect(Collectors.joining(" ")));
+                        value = headersValue;
                         break;
                     case FIELD_SIGNATURE:
                         value = makeValue(encodedSig);

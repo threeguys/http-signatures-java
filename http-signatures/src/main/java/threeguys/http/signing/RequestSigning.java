@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RequestSigning {
@@ -75,6 +76,10 @@ public class RequestSigning {
         return Arrays.asList(
             FIELD_ALGORITHM, FIELD_KEY_ID, FIELD_CREATED, FIELD_EXPIRES, FIELD_HEADERS, FIELD_SIGNATURE
         );
+    }
+
+    public static Pattern defaultKeyIdFormat() {
+        return Pattern.compile("[a-zA-Z0-9.#$!?@^&*()\\[\\]/\\\\'+=_-]");
     }
 
     public Signature getSignature(String algorithm) throws NoSuchAlgorithmException {
