@@ -1,3 +1,18 @@
+/**
+ *    Copyright 2020 Ray Cole
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package threeguys.http.signing.spring;
 
 import org.junit.Test;
@@ -11,7 +26,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -20,7 +39,6 @@ import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
 import threeguys.http.signing.RequestSigning;
 import threeguys.http.signing.exceptions.InvalidSignatureException;
-import threeguys.http.signing.exceptions.KeyNotFoundException;
 import threeguys.http.signing.providers.KeyProvider;
 import threeguys.http.signing.servlet.HttpSignatureVerifierFilter;
 
@@ -32,9 +50,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,6 +70,17 @@ public class IntegrationTest {
 
     @Autowired
     private SigningClientHttpRequestInterceptor interceptor;
+
+    @Controller
+    public static class DemoController {
+
+        @RequestMapping("/")
+        public @ResponseBody
+        String helloWorld(@RequestParam("name") String name) {
+            return "Hello, " + name + "!";
+        }
+
+    }
 
     public static class BaseKeyProvider<T extends Key> {
         private String name;

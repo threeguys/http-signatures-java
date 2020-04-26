@@ -23,7 +23,7 @@ import threeguys.http.signing.providers.KeyProvider;
 
 import java.security.PublicKey;
 import java.security.Signature;
-import java.time.Instant;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -44,15 +44,17 @@ import static threeguys.http.signing.RequestSigning.HEADER;
 
 public class HttpVerifierImpl implements HttpVerifier {
 
+    private final Clock clock;
     private final RequestSigning signing;
     private final KeyProvider<PublicKey> keyProvider;
-    private final long maxCreateAgeSec;
+    private final int maxCreateAgeSec;
 
     public HttpVerifierImpl(RequestSigning signing, KeyProvider<PublicKey> keyProvider) {
-        this(signing, keyProvider, Long.MAX_VALUE);
+        this(Clock.systemUTC(), signing, keyProvider, Integer.MAX_VALUE);
     }
 
-    public HttpVerifierImpl(RequestSigning signing, KeyProvider<PublicKey> keyProvider, long maxCreateAgeSec) {
+    public HttpVerifierImpl(Clock clock, RequestSigning signing, KeyProvider<PublicKey> keyProvider, int maxCreateAgeSec) {
+        this.clock = clock;
         this.signing = signing;
         this.keyProvider = keyProvider;
         this.maxCreateAgeSec = maxCreateAgeSec;
@@ -140,7 +142,7 @@ public class HttpVerifierImpl implements HttpVerifier {
             long created = Long.parseLong(fields.get(FIELD_CREATED));
             long expires = Long.parseLong(fields.get(FIELD_EXPIRES));
 
-            long now = Instant.now().getEpochSecond();
+            long now = clock.instant().getEpochSecond();
             long checkCreate = now - maxCreateAgeSec;
 
             if (checkCreate > created) {

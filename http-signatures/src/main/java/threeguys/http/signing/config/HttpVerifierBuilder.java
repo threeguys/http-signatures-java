@@ -31,6 +31,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,7 @@ public class HttpVerifierBuilder {
     private String keystoreType;
     private String keystorePath;
     private int maxAge = -1;
+    private Clock clock;
 
     public HttpVerifierBuilder withAlgorithms(Map<String, String> algorithms) {
         this.algorithms = algorithms;
@@ -90,6 +92,11 @@ public class HttpVerifierBuilder {
 
     public HttpVerifierBuilder withMaxAge(int maxAge) {
         this.maxAge = maxAge;
+        return this;
+    }
+
+    public HttpVerifierBuilder withClock(Clock clock) {
+        this.clock = clock;
         return this;
     }
 
@@ -213,12 +220,16 @@ public class HttpVerifierBuilder {
             maxAge = DEFAULT_MAX_AGE_SEC;
         }
 
+        if (clock == null) {
+            clock = Clock.systemUTC();
+        }
+
         RequestSigning signing = new RequestSigning(algorithms, fields);
 
         KeyStore keyStore = loadKeyStore(keystoreType, keystorePath, keystorePassword);
         KeyProvider<PublicKey> keyProvider = new PublicKeyStoreProvider(keyStore, keystorePassword);
 
-        return new HttpVerifierImpl(signing, keyProvider, maxAge);
+        return new HttpVerifierImpl(clock, signing, keyProvider, maxAge);
     }
 
 }
