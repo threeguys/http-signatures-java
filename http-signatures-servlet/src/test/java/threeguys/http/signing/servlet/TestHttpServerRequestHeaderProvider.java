@@ -13,17 +13,18 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing.spring;
+package threeguys.http.signing.servlet;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import threeguys.http.signing.providers.HeaderProvider;
+import threeguys.http.signing.servlet.HttpServletRequestHeaderProvider;
 
 import static threeguys.http.signing.RequestSigning.*;
 
 import static org.junit.Assert.*;
 
-public class TestHttpServerRequestProvider {
+public class TestHttpServerRequestHeaderProvider {
 
     @Test
     public void happyCase() throws Exception {
@@ -32,7 +33,7 @@ public class TestHttpServerRequestProvider {
         request.addHeader("Multi-Value-Header", "one,two,three");
         request.addHeader("Empty-Header", "");
 
-        HeaderProvider provider = new HttpServletRequestProvider(request);
+        HeaderProvider provider = new HttpServletRequestHeaderProvider(request);
         assertArrayEquals(new String[] { "one,two,three" }, provider.get("Multi-Value-Header"));
         assertArrayEquals(new String[] { "" }, provider.get("Empty-Header"));
         assertArrayEquals(new String[] { "example-signature" }, provider.get(HEADER));

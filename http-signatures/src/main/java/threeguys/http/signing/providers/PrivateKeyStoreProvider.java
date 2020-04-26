@@ -18,10 +18,24 @@ package threeguys.http.signing.providers;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
 
 import java.security.Key;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 
-@FunctionalInterface
-public interface KeyProvider<T extends Key> {
+public class PrivateKeyStoreProvider extends AbstractKeyStoreProvider implements KeyProvider<PrivateKey> {
 
-    T get(String name) throws KeyNotFoundException;
+    public PrivateKeyStoreProvider(KeyStore store, char [] password) {
+        super(store, password);
+    }
+
+    @Override
+    public PrivateKey get(String name) throws KeyNotFoundException {
+        Key key = getKey(name);
+
+        if (key instanceof PrivateKey) {
+            return (PrivateKey) key;
+        }
+
+        throw new KeyNotFoundException("Key " + name + " is not a private key");
+    }
 
 }

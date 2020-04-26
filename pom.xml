@@ -13,6 +13,7 @@
     <properties>
         <junit.version>4.12</junit.version>
         <project.version>0.1-SNAPSHOT</project.version>
+        <spring.version>5.2.5.RELEASE</spring.version>
     </properties>
 
     <dependencies>

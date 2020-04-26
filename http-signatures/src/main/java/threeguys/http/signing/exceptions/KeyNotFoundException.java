@@ -15,10 +15,18 @@
  */
 package threeguys.http.signing.exceptions;
 
-public class KeyIdNotFoundException extends SignatureException {
+public class KeyNotFoundException extends SignatureException {
 
-    public KeyIdNotFoundException(String message) {
+    public KeyNotFoundException(String message) {
         super(message);
+    }
+
+    public KeyNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    public KeyNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

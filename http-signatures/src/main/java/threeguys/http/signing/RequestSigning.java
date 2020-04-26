@@ -86,6 +86,10 @@ public class RequestSigning {
         return Signature.getInstance(algorithms.get(algorithm));
     }
 
+    public Map<String, String> getAlgorithms() {
+        return algorithms;
+    }
+
     public List<String> getFields() {
         return fields;
     }

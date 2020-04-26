@@ -13,23 +13,23 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing.spring;
+package threeguys.http.signing.servlet;
 
 import threeguys.http.signing.providers.HeaderProvider;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class HttpServletRequestProvider implements HeaderProvider {
+public class HttpServletRequestHeaderProvider implements HeaderProvider {
 
     private final HttpServletRequest request;
 
-    public HttpServletRequestProvider(HttpServletRequest request) {
+    public HttpServletRequestHeaderProvider(HttpServletRequest request) {
         this.request = request;
     }
 
     @Override
-    public String[] get(String name) throws Exception {
+    public String[] get(String name) {
         return Collections.list(request.getHeaders(name))
                 .toArray(new String[] {});
     }

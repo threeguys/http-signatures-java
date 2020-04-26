@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class TestHttpVerifier {
+public class TestHttpVerifierImpl {
 
     private static class MockHeaderProvider implements HeaderProvider {
 
@@ -71,7 +71,7 @@ public class TestHttpVerifier {
     private String keyGenerator;
     private int keySize;
 
-    public TestHttpVerifier(String algorithm, String keyGenerator, int keySize) {
+    public TestHttpVerifierImpl(String algorithm, String keyGenerator, int keySize) {
         this.algorithm = algorithm;
         this.keyGenerator = keyGenerator;
         this.keySize = keySize;
@@ -99,7 +99,7 @@ public class TestHttpVerifier {
 
         data.put(RequestSigning.HEADER, new String[] { sig });
 
-        HttpVerifier verifier = new HttpVerifier(signing, (n) -> pair.getPublic());
+        HttpVerifier verifier = new HttpVerifierImpl(signing, (n) -> pair.getPublic());
         VerificationResult result = verifier.verify("GET", "/yo/mom", provider);
         assertNotNull(result);
     }
