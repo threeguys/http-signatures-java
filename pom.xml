@@ -11,22 +11,61 @@
     <url>http://github.com/threeguys/http-signatures-java.git</url>
 
     <properties>
+        <javax.servlet.version>3.1.0</javax.servlet.version>
         <junit.version>4.12</junit.version>
         <project.version>0.1-SNAPSHOT</project.version>
-        <spring.version>5.2.5.RELEASE</spring.version>
+        <spring.framework.version>5.2.5.RELEASE</spring.framework.version>
+        <spring.boot.version>2.2.6.RELEASE</spring.boot.version>
     </properties>
 
-    <dependencies>
+    <dependencyManagement>
+        <dependencies>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${javax.servlet.version}</version>
+            </dependency>
 
-    </dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.framework.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
