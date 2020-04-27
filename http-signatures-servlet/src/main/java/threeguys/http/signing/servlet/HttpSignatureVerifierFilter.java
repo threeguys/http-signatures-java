@@ -92,7 +92,6 @@ public class HttpSignatureVerifierFilter implements Filter {
     }
 
     public boolean doFilter(ServletRequest servletRequest) throws ServletException {
-        System.err.println("INSIDE doFilter() filter");
         if (servletRequest instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
 

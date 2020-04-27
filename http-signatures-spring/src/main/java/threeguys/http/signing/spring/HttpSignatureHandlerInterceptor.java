@@ -32,9 +32,7 @@ public class HttpSignatureHandlerInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        boolean result = filter.doFilter(request);
-        System.err.println("VERIFY RESULT: " + request.getRequestURI() + " - " + result);
-        return result;
+        return filter.doFilter(request);
     }
 
 }
