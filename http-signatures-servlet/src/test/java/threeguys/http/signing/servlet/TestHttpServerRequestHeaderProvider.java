@@ -18,9 +18,8 @@ package threeguys.http.signing.servlet;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import threeguys.http.signing.providers.HeaderProvider;
-import threeguys.http.signing.servlet.HttpServletRequestHeaderProvider;
 
-import static threeguys.http.signing.RequestSigning.*;
+import static threeguys.http.signing.Signatures.*;
 
 import static org.junit.Assert.*;
 

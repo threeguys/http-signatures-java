@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
-import threeguys.http.signing.RequestSigning;
+import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.KeyProvider;
 import threeguys.http.signing.servlet.HttpSignatureVerifierFilter;
 import threeguys.http.signing.spring.HttpSignatureHandlerInterceptor;
@@ -35,13 +35,8 @@ public class HttpVerifierConfiguration {
     protected int maxAgeSecs;
 
     @Bean
-    public RequestSigning signing() {
-        return new RequestSigning();
-    }
-
-    @Bean
-    public HttpVerifier verifier(RequestSigning signing, KeyProvider<PublicKey> keyProvider) {
-        return new HttpVerifierImpl(Clock.systemUTC(), signing, keyProvider, maxAgeSecs);
+    public HttpVerifier verifier(Signatures signatures, KeyProvider<PublicKey> keyProvider) {
+        return new HttpVerifierImpl(Clock.systemUTC(), signatures, keyProvider, maxAgeSecs);
     }
 
     @Bean

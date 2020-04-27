@@ -15,23 +15,35 @@
  */
 package threeguys.http.signing.servlet;
 
+import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.HeaderProvider;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpServletRequestHeaderProvider implements HeaderProvider {
 
     private final HttpServletRequest request;
+    private final Map<String, String> nameMappings;
 
     public HttpServletRequestHeaderProvider(HttpServletRequest request) {
         this.request = request;
+        this.nameMappings = Collections.unmodifiableMap(Collections.list(this.request.getHeaderNames()).stream()
+                .collect(Collectors.toMap(Signatures::canonicalizeName, (n) -> n)));
     }
 
     @Override
     public String[] get(String name) {
-        return Collections.list(request.getHeaders(name))
-                .toArray(new String[] {});
+        String mappedName = nameMappings.get(Signatures.canonicalizeName(name));
+        if (mappedName == null) {
+            return null;
+        }
+
+        List<String> headers = Collections.list(request.getHeaders(name));
+        return (headers.size() == 0) ? null : headers.toArray(new String[] {});
     }
 
 }

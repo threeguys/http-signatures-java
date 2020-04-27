@@ -13,37 +13,27 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing;
+package threeguys.http.signing.providers;
 
-import java.security.PublicKey;
-import java.util.Map;
+import threeguys.http.signing.exceptions.KeyNotFoundException;
 
-import static threeguys.http.signing.Signatures.*;
+import java.security.Key;
 
-public class VerificationResult {
+public class SimpleKeyProvider<T extends Key> implements KeyProvider<T> {
 
-    private final Map<String, String> fields;
-    private final PublicKey key;
+    private T key;
 
-    public VerificationResult(PublicKey key, Map<String, String> fields) {
+    public SimpleKeyProvider(T key) {
         this.key = key;
-        this.fields = fields;
     }
 
-    public PublicKey getKey() {
+    @Override
+    public T get(String name) throws KeyNotFoundException {
         return key;
     }
 
-    public Map<String, String> getFields() {
-        return fields;
-    }
-
-    public String getAlgorithm() {
-        return fields.get(FIELD_ALGORITHM);
-    }
-
-    public String getKeyId() {
-        return fields.get(FIELD_KEY_ID);
+    public void setKey(T key) {
+        this.key = key;
     }
 
 }

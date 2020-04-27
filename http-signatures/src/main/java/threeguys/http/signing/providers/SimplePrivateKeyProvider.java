@@ -13,12 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing.spring;
+package threeguys.http.signing.providers;
 
-public class HttpSignatureAuthenticationException extends Exception {
+import java.security.PrivateKey;
 
-    public HttpSignatureAuthenticationException(String msg, Throwable t) {
-        super(msg, t);
+public class SimplePrivateKeyProvider extends SimpleKeyProvider<PrivateKey> {
+
+    public SimplePrivateKeyProvider(PrivateKey key) {
+        super(key);
     }
 
 }

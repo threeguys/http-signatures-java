@@ -34,33 +34,33 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static threeguys.http.signing.RequestSigning.FIELD_ALGORITHM;
-import static threeguys.http.signing.RequestSigning.FIELD_CREATED;
-import static threeguys.http.signing.RequestSigning.FIELD_EXPIRES;
-import static threeguys.http.signing.RequestSigning.FIELD_HEADERS;
-import static threeguys.http.signing.RequestSigning.FIELD_KEY_ID;
-import static threeguys.http.signing.RequestSigning.FIELD_SIGNATURE;
-import static threeguys.http.signing.RequestSigning.HEADER;
+import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
+import static threeguys.http.signing.Signatures.FIELD_CREATED;
+import static threeguys.http.signing.Signatures.FIELD_EXPIRES;
+import static threeguys.http.signing.Signatures.FIELD_HEADERS;
+import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
+import static threeguys.http.signing.Signatures.FIELD_SIGNATURE;
+import static threeguys.http.signing.Signatures.HEADER;
 
 public class HttpVerifierImpl implements HttpVerifier {
 
     private final Clock clock;
-    private final RequestSigning signing;
+    private final Signatures signing;
     private final KeyProvider<PublicKey> keyProvider;
     private final int maxCreateAgeSec;
 
-    public HttpVerifierImpl(RequestSigning signing, KeyProvider<PublicKey> keyProvider) {
+    public HttpVerifierImpl(Signatures signing, KeyProvider<PublicKey> keyProvider) {
         this(Clock.systemUTC(), signing, keyProvider, Integer.MAX_VALUE);
     }
 
-    public HttpVerifierImpl(Clock clock, RequestSigning signing, KeyProvider<PublicKey> keyProvider, int maxCreateAgeSec) {
+    public HttpVerifierImpl(Clock clock, Signatures signing, KeyProvider<PublicKey> keyProvider, int maxCreateAgeSec) {
         this.clock = clock;
         this.signing = signing;
         this.keyProvider = keyProvider;
         this.maxCreateAgeSec = maxCreateAgeSec;
     }
 
-    public RequestSigning getSigning() {
+    public Signatures getSigning() {
         return signing;
     }
 
@@ -164,8 +164,14 @@ public class HttpVerifierImpl implements HttpVerifier {
             // Verify the signature
             signature.initVerify(key);
 
-            byte [] payload = signing.assemblePayload(method, url, headers, provider, created);
-            signature.update(payload);
+            List<String> headersToUse = Arrays.asList(fields.get(FIELD_HEADERS).split(" "));
+
+            Payload payload = signing.assemblePayload(method, url, provider, headersToUse, created, expires);
+            signature.update(payload.getPlaintext());
+
+            if (!payload.getHeaders().equals(fields.get(FIELD_HEADERS))) {
+                throw new InvalidSignatureException("Headers fields did not match");
+            }
 
             byte [] data = Base64.getDecoder().decode(fields.get(FIELD_SIGNATURE));
             if (!signature.verify(data)) {

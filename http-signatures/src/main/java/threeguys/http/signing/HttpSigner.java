@@ -31,12 +31,12 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static threeguys.http.signing.RequestSigning.FIELD_ALGORITHM;
-import static threeguys.http.signing.RequestSigning.FIELD_CREATED;
-import static threeguys.http.signing.RequestSigning.FIELD_EXPIRES;
-import static threeguys.http.signing.RequestSigning.FIELD_HEADERS;
-import static threeguys.http.signing.RequestSigning.FIELD_KEY_ID;
-import static threeguys.http.signing.RequestSigning.FIELD_SIGNATURE;
+import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
+import static threeguys.http.signing.Signatures.FIELD_CREATED;
+import static threeguys.http.signing.Signatures.FIELD_EXPIRES;
+import static threeguys.http.signing.Signatures.FIELD_HEADERS;
+import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
+import static threeguys.http.signing.Signatures.FIELD_SIGNATURE;
 
 public class HttpSigner {
 
@@ -44,13 +44,13 @@ public class HttpSigner {
     private String keyId;
     private final KeyProvider<PrivateKey> privateKey;
     private final List<String> headers;
-    private final RequestSigning signing;
+    private final Signatures signing;
     private final int expirationSec;
 
     private String algorithmValue;
     private String headersValue;
 
-    public HttpSigner(String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, List<String> headers, RequestSigning signing, int expirationSec) throws InvalidSignatureException {
+    public HttpSigner(String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, List<String> headers, Signatures signing, int expirationSec) throws InvalidSignatureException {
         this.algorithm = algorithm;
         this.keyId = keyId;
         this.privateKey = privateKey;
@@ -95,12 +95,13 @@ public class HttpSigner {
             PrivateKey key = privateKey.get(reqKeyId);
 
             long created = Instant.now().getEpochSecond();
-            byte [] payload = signing.assemblePayload(method, url, headers, provider, created);
+            long expires = created + expirationSec;
+            Payload payload = signing.assemblePayload(method, url, provider, created, expires);
 
             // Create the signature
             Signature signature = signing.getSignature(algorithm);
             signature.initSign(key);
-            signature.update(payload);
+            signature.update(payload.getPlaintext());
             String encodedSig = Base64.getEncoder().encodeToString(signature.sign());
 
             List<String> output = new ArrayList<>();
@@ -117,10 +118,10 @@ public class HttpSigner {
                         value = Long.toString(created);
                         break;
                     case FIELD_EXPIRES:
-                        value = Long.toString(created + expirationSec);
+                        value = Long.toString(expires);
                         break;
                     case FIELD_HEADERS:
-                        value = headersValue;
+                        value = makeValue(payload.getHeaders());
                         break;
                     case FIELD_SIGNATURE:
                         value = makeValue(encodedSig);

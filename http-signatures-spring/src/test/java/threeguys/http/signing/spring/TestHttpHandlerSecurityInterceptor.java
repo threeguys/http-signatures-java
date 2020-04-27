@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
-import static threeguys.http.signing.RequestSigning.FIELD_ALGORITHM;
-import static threeguys.http.signing.RequestSigning.FIELD_KEY_ID;
+import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
+import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
 
 public class TestHttpHandlerSecurityInterceptor {
 

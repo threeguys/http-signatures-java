@@ -36,6 +36,14 @@ There's an example echo server that will validate signed requests under
 register itself and make varying types of request, according to command line parameters under
 <a href="examples/echo-spring-client">examples/echo-spring-client</a>. 
 
+# Roadmap
+My tentative plans are as follow:
+* Fully test and document <a href="http-signatures">http-signatures</a>
+* Clean up spring boot
+* Add Netty support
+* Add servlet example
+* Write up on how to use this to make your service secure
+
 # License
 
 Released under Apache 2.0 License. Please see <a href="LICENSE">LICENSE</a> for more details.
@@ -43,5 +51,3 @@ Released under Apache 2.0 License. Please see <a href="LICENSE">LICENSE</a> for 
 # Contributing
 
 Please see <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> for more information about contributing.
-
-

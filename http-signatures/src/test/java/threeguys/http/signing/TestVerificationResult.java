@@ -31,8 +31,8 @@ public class TestVerificationResult {
         };
 
         Map<String, String> fields = new HashMap<>();
-        fields.put(RequestSigning.FIELD_ALGORITHM, "test-algo");
-        fields.put(RequestSigning.FIELD_KEY_ID, "test-key-id");
+        fields.put(Signatures.FIELD_ALGORITHM, "test-algo");
+        fields.put(Signatures.FIELD_KEY_ID, "test-key-id");
 
         VerificationResult r = new VerificationResult(pk, fields);
         assertEquals(pk, r.getKey());

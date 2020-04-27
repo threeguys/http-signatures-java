@@ -15,35 +15,22 @@
  */
 package threeguys.http.signing;
 
-import java.security.PublicKey;
-import java.util.Map;
+public class Payload {
 
-import static threeguys.http.signing.Signatures.*;
+    private final String headers;
+    private final byte [] plaintext;
 
-public class VerificationResult {
-
-    private final Map<String, String> fields;
-    private final PublicKey key;
-
-    public VerificationResult(PublicKey key, Map<String, String> fields) {
-        this.key = key;
-        this.fields = fields;
+    public Payload(String headers, byte[] plaintext) {
+        this.headers = headers;
+        this.plaintext = plaintext;
     }
 
-    public PublicKey getKey() {
-        return key;
+    public String getHeaders() {
+        return headers;
     }
 
-    public Map<String, String> getFields() {
-        return fields;
-    }
-
-    public String getAlgorithm() {
-        return fields.get(FIELD_ALGORITHM);
-    }
-
-    public String getKeyId() {
-        return fields.get(FIELD_KEY_ID);
+    public byte[] getPlaintext() {
+        return plaintext;
     }
 
 }

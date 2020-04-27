@@ -17,7 +17,7 @@ package threeguys.http.signing.config;
 
 import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
-import threeguys.http.signing.RequestSigning;
+import threeguys.http.signing.Signatures;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.KeyProvider;
@@ -44,6 +44,7 @@ public class HttpVerifierBuilder {
     private Map<String, String> algorithms;
     private String algorithmList;
     private List<String> fields;
+    private List<String> headersToInclude;
     private String fieldList;
     private char [] keystorePassword;
     private String keystoreType;
@@ -68,6 +69,11 @@ public class HttpVerifierBuilder {
 
     public HttpVerifierBuilder withFieldList(String fieldList) {
         this.fieldList = fieldList;
+        return this;
+    }
+
+    public HttpVerifierBuilder withHeadersToInclude(List<String> headersToInclude) {
+        this.headersToInclude = headersToInclude;
         return this;
     }
 
@@ -137,8 +143,8 @@ public class HttpVerifierBuilder {
         for (String e : entries) {
             if (e.startsWith("(") || e.endsWith(")")) {
                 switch(e) {
-                    case RequestSigning.HEADER_CREATED:
-                    case RequestSigning.HEADER_REQUEST_TARGET:
+                    case Signatures.HEADER_CREATED:
+                    case Signatures.HEADER_REQUEST_TARGET:
                         break;
 
                     default:
@@ -158,7 +164,7 @@ public class HttpVerifierBuilder {
 
     protected Map<String, String> parseAlgorithms(String entry) throws SignatureException {
         String [] algoEntries = entry.split(",");
-        Map<String, String> defaultAlgos = RequestSigning.defaultAlgorithms();
+        Map<String, String> defaultAlgos = Signatures.defaultAlgorithms();
         Map<String, String> algos = new HashMap<>();
 
         for (String a : algoEntries) {
@@ -199,13 +205,17 @@ public class HttpVerifierBuilder {
         if (algorithmList != null) {
             algorithms = parseAlgorithms(algorithmList);
         } else if (algorithms == null) {
-            algorithms = RequestSigning.defaultAlgorithms();
+            algorithms = Signatures.defaultAlgorithms();
         }
 
         if (fieldList != null) {
             fields = parseFieldList(fieldList);
         } else if (fields == null) {
-            fields = RequestSigning.defaultFields();
+            fields = Signatures.defaultFields();
+        }
+
+        if (headersToInclude == null) {
+            headersToInclude = Signatures.defaultHeadersToInclude();
         }
 
         if (keystoreType == null) {
@@ -224,7 +234,7 @@ public class HttpVerifierBuilder {
             clock = Clock.systemUTC();
         }
 
-        RequestSigning signing = new RequestSigning(algorithms, fields);
+        Signatures signing = new Signatures(algorithms, fields, headersToInclude);
 
         KeyStore keyStore = loadKeyStore(keystoreType, keystorePath, keystorePassword);
         KeyProvider<PublicKey> keyProvider = new PublicKeyStoreProvider(keyStore, keystorePassword);

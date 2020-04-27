@@ -13,37 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing;
+package threeguys.http.signing.providers;
 
 import java.security.PublicKey;
-import java.util.Map;
 
-import static threeguys.http.signing.Signatures.*;
+public class SimplePublicKeyProvider extends SimpleKeyProvider<PublicKey> {
 
-public class VerificationResult {
-
-    private final Map<String, String> fields;
-    private final PublicKey key;
-
-    public VerificationResult(PublicKey key, Map<String, String> fields) {
-        this.key = key;
-        this.fields = fields;
-    }
-
-    public PublicKey getKey() {
-        return key;
-    }
-
-    public Map<String, String> getFields() {
-        return fields;
-    }
-
-    public String getAlgorithm() {
-        return fields.get(FIELD_ALGORITHM);
-    }
-
-    public String getKeyId() {
-        return fields.get(FIELD_KEY_ID);
+    public SimplePublicKeyProvider(PublicKey key) {
+        super(key);
     }
 
 }

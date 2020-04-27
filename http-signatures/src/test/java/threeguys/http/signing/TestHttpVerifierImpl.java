@@ -47,11 +47,11 @@ public class TestHttpVerifierImpl {
 
         @Override
         public String[] get(String name) throws Exception {
-            String [] result = data.get(name);
-            if (result == null) {
-                throw new IllegalArgumentException(name);
-            }
-            return result;
+            return data.get(name);
+//            if (result == null) {
+//                throw new IllegalArgumentException(name);
+//            }
+//            return result;
         }
     }
 
@@ -83,10 +83,10 @@ public class TestHttpVerifierImpl {
         generator.initialize(keySize, new SecureRandom());
         KeyPair pair = generator.generateKeyPair();
 
-        RequestSigning signing = new RequestSigning();
+        Signatures signing = new Signatures();
 
         PrivateKey key = pair.getPrivate();
-        List<String> headers = Arrays.asList(RequestSigning.HEADER_REQUEST_TARGET, RequestSigning.HEADER_CREATED, "foo", "bar", "baz");
+        List<String> headers = Arrays.asList(Signatures.HEADER_REQUEST_TARGET, Signatures.HEADER_CREATED, "foo", "bar", "baz");
         HttpSigner signer = new HttpSigner(algorithm, "test-key", (n) -> key, headers, signing, 300);
 
         Map<String, String[]> data = new HashMap<>();
@@ -97,7 +97,7 @@ public class TestHttpVerifierImpl {
 
         String sig = signer.sign("GET", "/yo/mom", provider);
 
-        data.put(RequestSigning.HEADER, new String[] { sig });
+        data.put(Signatures.HEADER, new String[] { sig });
 
         HttpVerifier verifier = new HttpVerifierImpl(signing, (n) -> pair.getPublic());
         VerificationResult result = verifier.verify("GET", "/yo/mom", provider);
