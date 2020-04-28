@@ -113,9 +113,6 @@ public class TestHttpSignatureVerifierFilter {
         config.addInitParameter(PARAM_ALGORITHMS, "rsa-sha256,ecdsa-sha256,my-custom=SomthingThatDoesntExist");
         config.addInitParameter(PARAM_FIELDS, "(request-target),(created),host,content-type");
         config.addInitParameter(PARAM_MAX_AGE, "1234");
-        config.addInitParameter(PARAM_KEYSTORE_TYPE, KeyStore.getDefaultType());
-        config.addInitParameter(PARAM_KEYSTORE_PATH, keyStoreFile.getAbsolutePath());
-        config.addInitParameter(PARAM_KEYSTORE_PASSWORD, "your-mom");
         HttpSignatureVerifierFilter filter = new HttpSignatureVerifierFilter();
         filter.init(config);
 

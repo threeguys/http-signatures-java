@@ -31,10 +31,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Signatures {
+
+    public static final String DEFAULT_ALGORITHM = "rsa-sha512";
 
     public static final String HEADER = "Signature";
 
@@ -53,15 +54,20 @@ public class Signatures {
     private final List<String> fields;
     private final Set<String> fieldIndex;
     private final List<String> headersToInclude;
+    private final Map<String, String> canonicalHeaderMap;
+    private final String defaultAlgorithm;
 
     public Signatures() {
-        this(defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
+        this("rsa-sha512", defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
     }
 
-    public Signatures(Map<String, String> algorithms, List<String> fields, List<String> headersToInclude) {
+    public Signatures(String defaultAlgorithm, Map<String, String> algorithms, List<String> fields, List<String> headersToInclude) {
+        this.defaultAlgorithm = defaultAlgorithm;
         this.algorithms = algorithms;
         this.fields = Collections.unmodifiableList(fields);
         this.headersToInclude = Collections.unmodifiableList(headersToInclude);
+        this.canonicalHeaderMap = headersToInclude.stream()
+                .collect(Collectors.toMap(Signatures::canonicalizeName, (h) -> h));
         this.fieldIndex = Collections.unmodifiableSet(new HashSet<>(fields));
     }
 
@@ -73,8 +79,23 @@ public class Signatures {
         algos.put("ecdsa-sha256", "SHA256withECDSA");
         algos.put("ecdsa-sha384", "SHA384withECDSA");
         algos.put("ecdsa-sha512", "SHA512withECDSA");
+        algos.put("hs2019", "RSASSA-PSS");
+        algos.put("rsapss-sha256", "SHA256withRSA/PSS");
+        algos.put("rsapss-sha512", "RSASSA-PSS");
         return Collections.unmodifiableMap(algos);
     }
+
+    public static Map<String, String> fipsAlgorithms() {
+        Map<String, String> algos = new HashMap<>();
+        algos.put("dsa", "NONEwithDSA");
+        algos.put("dsa-sha1", "SHA1withDSA");
+        algos.put("dsa-sha224", "SHA224withDSA");
+        algos.put("dsa-sha256", "SHA256withDSA");
+        algos.put("dsa-sha384", "SHA384withDSA");
+        algos.put("dsa-sha512", "SHA512withDSA");
+        return Collections.unmodifiableMap(algos);
+    }
+
 
     public static List<String> defaultFields() {
         return Arrays.asList(
@@ -91,12 +112,10 @@ public class Signatures {
                 "Access-Control-Expose-Headers", "User-Agent");
     }
 
-    public static Pattern defaultKeyIdFormat() {
-        return Pattern.compile("[a-zA-Z0-9.#$!?@^&*()\\[\\]/\\\\'+=_-]");
-    }
-
     public Signature getSignature(String algorithm) throws NoSuchAlgorithmException {
-        return Signature.getInstance(algorithms.get(algorithm));
+        String instanceName = algorithms.get(algorithm);
+        System.out.println("Loading signature instance: " + instanceName);
+        return Signature.getInstance(instanceName);
     }
 
     public Map<String, String> getAlgorithms() {
@@ -105,6 +124,10 @@ public class Signatures {
 
     public List<String> getFields() {
         return fields;
+    }
+
+    public String getDefaultAlgorithm() {
+        return defaultAlgorithm;
     }
 
     public boolean validField(String field) {
@@ -122,12 +145,12 @@ public class Signatures {
                         .collect(Collectors.joining(", ")));
     }
 
-    public Payload assemblePayload(String method, String url, HeaderProvider provider, List<String> useHeaders, long created, long expires) throws SignatureException {
+    public Payload assemblePayload(String method, String url, HeaderProvider provider, long created, long expires, List<String> requiredHeaders) throws SignatureException {
         try {
             StringBuilder sb = new StringBuilder();
             List<String> found = new LinkedList<>();
 
-            for (String hdr : useHeaders) {
+            for (String hdr : requiredHeaders) {
                 String value;
                 if (HEADER_CREATED.equals(hdr)) {
                     value = String.format("%s: %d", HEADER_CREATED, created);
@@ -143,7 +166,11 @@ public class Signatures {
                     found.add(HEADER_EXPIRES);
 
                 } else {
-                    String[] values = provider.get(hdr);
+                    // TODO I don't like this hack..., we should do better
+                    String[] values = canonicalHeaderMap.containsKey(hdr)
+                            ? provider.get(canonicalHeaderMap.get(hdr))
+                            : provider.get(hdr);
+
                     if (values != null) {
                         value = canonicalize(hdr, values);
                         found.add(hdr);
@@ -153,7 +180,10 @@ public class Signatures {
                 }
 
                 if (value != null) {
-                    sb.append(value).append("\n");
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(value);
                 }
             }
 
@@ -172,7 +202,7 @@ public class Signatures {
     }
 
     public Payload assemblePayload(String method, String url, HeaderProvider provider, long created, long expires) throws SignatureException {
-        return assemblePayload(method, url, provider, headersToInclude, created, expires);
+        return assemblePayload(method, url, provider, created, expires, headersToInclude);
     }
 
 }

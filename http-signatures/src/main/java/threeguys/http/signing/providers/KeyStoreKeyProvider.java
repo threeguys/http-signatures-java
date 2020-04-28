@@ -21,33 +21,37 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 
-public class AbstractKeyStoreProvider {
+public class KeyStoreKeyProvider implements KeyProvider<PrivateKey> {
 
     private final KeyStore store;
     private final char [] password;
 
-    public AbstractKeyStoreProvider(KeyStore store, char [] password) {
+    public KeyStoreKeyProvider(KeyStore store, char [] password) {
         this.store = store;
         this.password = password.clone();
     }
 
-    protected Key getKey(String name) throws KeyNotFoundException {
+    @Override
+    public PrivateKey get(String name) throws KeyNotFoundException {
         Key key;
         try {
             key = store.getKey(name, password);
-        } catch (KeyStoreException | UnrecoverableKeyException e) {
+        } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new KeyNotFoundException(name, e);
         }
 
         if (key == null) {
             throw new KeyNotFoundException("Could not find key " + name);
         }
 
-        return key;
+        if (key instanceof PrivateKey) {
+            return (PrivateKey) key;
+        }
+
+        throw new KeyNotFoundException("Found key but was not a PrivateKey");
     }
 
 }

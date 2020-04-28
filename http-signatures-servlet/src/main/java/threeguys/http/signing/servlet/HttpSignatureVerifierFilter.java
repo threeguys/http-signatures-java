@@ -16,7 +16,7 @@
 package threeguys.http.signing.servlet;
 
 import threeguys.http.signing.HttpVerifier;
-import threeguys.http.signing.config.HttpVerifierBuilder;
+import threeguys.http.signing.HttpVerifierBuilder;
 import threeguys.http.signing.exceptions.SignatureException;
 
 import javax.servlet.Filter;
@@ -38,9 +38,6 @@ public class HttpSignatureVerifierFilter implements Filter {
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized";
 
     public static final String PARAM_ALGORITHMS = "algorithms";
-    public static final String PARAM_KEYSTORE_TYPE = "keystore.type";
-    public static final String PARAM_KEYSTORE_PATH = "keystore.path";
-    public static final String PARAM_KEYSTORE_PASSWORD = "keystore.password";
     public static final String PARAM_FIELDS = "fields";
     public static final String PARAM_MAX_AGE = "maxAgeSec";
 
@@ -74,14 +71,12 @@ public class HttpSignatureVerifierFilter implements Filter {
                 builder.withFieldList(params.get(PARAM_FIELDS));
             }
 
-            builder
-                .withKeystoreType(params.get(PARAM_KEYSTORE_TYPE))
-                .withKeystorePath(params.get(PARAM_KEYSTORE_PATH))
-                .withKeystorePassword(params.get(PARAM_KEYSTORE_PASSWORD));
-
             if (params.containsKey(PARAM_MAX_AGE)) {
                 builder.withMaxAge(params.get(PARAM_MAX_AGE));
             }
+
+            // TODO Need to come up with a way to pull public keystores
+            builder.withKeyProvider((n) -> null);
 
             try {
                 verifier = builder.build();

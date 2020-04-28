@@ -21,8 +21,11 @@ import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.HeaderProvider;
 import threeguys.http.signing.providers.KeyProvider;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Base64;
@@ -34,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_EXPIRES;
@@ -136,11 +140,9 @@ public class HttpVerifierImpl implements HttpVerifier {
 
             Map<String, String> fields = parseFields(signatureValue);
 
-            List<String> headers = Arrays.asList(fields.get(FIELD_HEADERS).split(" "));
-
             // Validate the timestamps in the signature
             long created = Long.parseLong(fields.get(FIELD_CREATED));
-            long expires = Long.parseLong(fields.get(FIELD_EXPIRES));
+
 
             long now = clock.instant().getEpochSecond();
             long checkCreate = now - maxCreateAgeSec;
@@ -149,30 +151,50 @@ public class HttpVerifierImpl implements HttpVerifier {
                 throw new ExpiredSignatureException(String.format("Create time of %d is too far in the past, check = %d", created, checkCreate));
             }
 
-            if (now > expires) {
-                throw new ExpiredSignatureException(String.format("Signature %d is expired, check = %d", expires, now));
+            long expires = Long.MAX_VALUE;
+            if (fields.containsKey(FIELD_EXPIRES)) {
+                expires = Long.parseLong(fields.get(FIELD_EXPIRES));
+                if (now > expires) {
+                    throw new ExpiredSignatureException(String.format("Signature %d is expired, check = %d", expires, now));
+                }
             }
 
             // Check the key parameters
             // these will throw exceptions if the values are not found
-            String algorithm = fields.get(FIELD_ALGORITHM);
+            String algorithm = fields.getOrDefault(FIELD_ALGORITHM, signing.getDefaultAlgorithm());
+            System.out.println("Verifying with algorithm: " + algorithm);
+
             Signature signature = signing.getSignature(algorithm);
+//            System.out.println("Provider keys: "
+//                    + signature.getProvider().keySet().stream().map(Object::toString)
+//                    .collect(Collectors.joining(",\n    ")));
 
             String keyId = fields.get(FIELD_KEY_ID);
             PublicKey key = keyProvider.get(keyId);
+            System.out.println("KEY: " + key.getFormat() + " ALGO: " + key.getAlgorithm());
+//            signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 20, 1));
+
+
+//            System.out.println("  algo: " + signature.getParameters().getAlgorithm() + " name: " + signature.getParameters().getProvider().getName());
+
 
             // Verify the signature
             signature.initVerify(key);
 
-            List<String> headersToUse = Arrays.asList(fields.get(FIELD_HEADERS).split(" "));
+            System.out.println("Checking HEADERS: " + fields.get(FIELD_HEADERS));
+            List<String> headers = Arrays.asList(fields.get(FIELD_HEADERS).split(" "));
+            System.out.println("After split HEADERS: " + headers.toString());
 
-            Payload payload = signing.assemblePayload(method, url, provider, headersToUse, created, expires);
+            Payload payload = signing.assemblePayload(method, url, provider, created, expires, headers);
+            System.out.println("HEADERS: " + payload.getHeaders());
+            System.out.println("CALCULATED payload: [" + new String(payload.getPlaintext(), StandardCharsets.UTF_8) + "]");
             signature.update(payload.getPlaintext());
 
             if (!payload.getHeaders().equals(fields.get(FIELD_HEADERS))) {
                 throw new InvalidSignatureException("Headers fields did not match");
             }
 
+            System.out.println("Signature was: [" + fields.get(FIELD_SIGNATURE) + "]");
             byte [] data = Base64.getDecoder().decode(fields.get(FIELD_SIGNATURE));
             if (!signature.verify(data)) {
                 throw new InvalidSignatureException("The signature was not verified");

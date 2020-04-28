@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import threeguys.http.signing.HttpSigner;
+import threeguys.http.signing.HttpSignerImpl;
 import threeguys.http.signing.Signatures;
 import threeguys.http.signing.exceptions.InvalidSignatureException;
 import threeguys.http.signing.providers.KeyProvider;
@@ -41,7 +42,7 @@ public class HttpSignerConfiguration {
 
     @Bean
     public HttpSigner signer(KeyProvider<PrivateKey> keyProvider, List<String> headersToSign, Signatures signatures) throws InvalidSignatureException {
-        return new HttpSigner("ecdsa-sha256", keyId, keyProvider, headersToSign, signatures, expirationSec);
+        return new HttpSignerImpl("ecdsa-sha256", keyId, keyProvider, headersToSign, signatures, expirationSec);
     }
 
     @Bean

@@ -15,12 +15,17 @@
  */
 package threeguys.http.signing.providers;
 
+import java.security.KeyPair;
 import java.security.PrivateKey;
 
 public class SimplePrivateKeyProvider extends SimpleKeyProvider<PrivateKey> {
 
     public SimplePrivateKeyProvider(PrivateKey key) {
         super(key);
+    }
+
+    public SimplePrivateKeyProvider(KeyPair kp) {
+        this(kp.getPrivate());
     }
 
 }

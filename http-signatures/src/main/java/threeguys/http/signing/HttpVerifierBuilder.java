@@ -13,24 +13,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing.config;
+package threeguys.http.signing;
 
-import threeguys.http.signing.HttpVerifier;
-import threeguys.http.signing.HttpVerifierImpl;
-import threeguys.http.signing.Signatures;
-import threeguys.http.signing.exceptions.KeyNotFoundException;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.KeyProvider;
-import threeguys.http.signing.providers.PublicKeyStoreProvider;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,14 +29,12 @@ public class HttpVerifierBuilder {
 
     public static final int DEFAULT_MAX_AGE_SEC = 300;
 
+    private KeyProvider<PublicKey> keyProvider;
     private Map<String, String> algorithms;
     private String algorithmList;
     private List<String> fields;
     private List<String> headersToInclude;
     private String fieldList;
-    private char [] keystorePassword;
-    private String keystoreType;
-    private String keystorePath;
     private int maxAge = -1;
     private Clock clock;
 
@@ -77,25 +63,6 @@ public class HttpVerifierBuilder {
         return this;
     }
 
-    public HttpVerifierBuilder withKeystorePassword(char [] keystorePassword) {
-        this.keystorePassword = keystorePassword;
-        return this;
-    }
-
-    public HttpVerifierBuilder withKeystorePassword(String keystorePassword) {
-        return withKeystorePassword(keystorePassword.toCharArray());
-    }
-
-    public HttpVerifierBuilder withKeystorePath(String keystorePath) {
-        this.keystorePath = keystorePath;
-        return this;
-    }
-
-    public HttpVerifierBuilder withKeystoreType(String keystoreType) {
-        this.keystoreType = keystoreType;
-        return this;
-    }
-
     public HttpVerifierBuilder withMaxAge(int maxAge) {
         this.maxAge = maxAge;
         return this;
@@ -110,30 +77,9 @@ public class HttpVerifierBuilder {
         return withMaxAge(Integer.parseInt(maxAge));
     }
 
-    public static KeyStore loadKeyStore(String storeType, String path, char [] password) throws KeyNotFoundException {
-        String useStoreType = storeType == null ? KeyStore.getDefaultType() : storeType;
-
-        if (path == null) {
-            throw new KeyNotFoundException("keystore parameter is required");
-        }
-
-        try {
-            KeyStore keyStore = KeyStore.getInstance(useStoreType);
-
-            InputStream input;
-            if (path.startsWith("classpath:")) {
-                input = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-            } else {
-                input = new FileInputStream(path);
-            }
-
-            keyStore.load(input, password);
-            return keyStore;
-
-        } catch (KeyStoreException | IOException
-                | CertificateException | NoSuchAlgorithmException e) {
-            throw new KeyNotFoundException(e);
-        }
+    public HttpVerifierBuilder withKeyProvider(KeyProvider<PublicKey> keyProvider) {
+        this.keyProvider = keyProvider;
+        return this;
     }
 
     public static List<String> parseFieldList(String entry) throws SignatureException {
@@ -190,8 +136,8 @@ public class HttpVerifierBuilder {
 
     public HttpVerifier build() throws SignatureException {
 
-        if (keystorePath == null) {
-            throw new KeyNotFoundException("keystorePath is required");
+        if (keyProvider == null) {
+            throw new NullPointerException("keyProvider");
         }
 
         if (fieldList != null && fields != null) {
@@ -218,14 +164,6 @@ public class HttpVerifierBuilder {
             headersToInclude = Signatures.defaultHeadersToInclude();
         }
 
-        if (keystoreType == null) {
-            keystoreType = KeyStore.getDefaultType();
-        }
-
-        if (keystorePassword == null) {
-            keystorePassword = new char[]{};
-        }
-
         if (maxAge <= 0) {
             maxAge = DEFAULT_MAX_AGE_SEC;
         }
@@ -234,10 +172,7 @@ public class HttpVerifierBuilder {
             clock = Clock.systemUTC();
         }
 
-        Signatures signing = new Signatures(algorithms, fields, headersToInclude);
-
-        KeyStore keyStore = loadKeyStore(keystoreType, keystorePath, keystorePassword);
-        KeyProvider<PublicKey> keyProvider = new PublicKeyStoreProvider(keyStore, keystorePassword);
+        Signatures signing = new Signatures(Signatures.DEFAULT_ALGORITHM, algorithms, fields, headersToInclude);
 
         return new HttpVerifierImpl(clock, signing, keyProvider, maxAge);
     }
