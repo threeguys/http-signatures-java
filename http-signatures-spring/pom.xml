@@ -8,11 +8,9 @@
         <groupId>threeguys.http.signatures</groupId>
         <artifactId>http-signatures-java</artifactId>
         <version>0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>http-signatures-spring</artifactId>
-    <version>${project.version}</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -55,12 +53,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.junit.vintage</groupId>-->
-<!--                    <artifactId>junit-vintage-engine</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
         </dependency>
 
         <dependency>

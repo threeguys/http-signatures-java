@@ -5,6 +5,13 @@
     <groupId>threeguys.http.signatures</groupId>
     <artifactId>http-signatures-java</artifactId>
     <version>0.1-SNAPSHOT</version>
+
+    <modules>
+        <module>http-signatures</module>
+        <module>http-signatures-servlet</module>
+        <module>http-signatures-spring</module>
+    </modules>
+
     <packaging>pom</packaging>
 
     <name>http-signatures-java Project Root</name>
