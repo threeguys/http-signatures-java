@@ -10,6 +10,7 @@
         <module>http-signatures</module>
         <module>http-signatures-servlet</module>
         <module>http-signatures-spring</module>
+        <module>http-signatures-examples</module>
     </modules>
 
     <packaging>pom</packaging>

@@ -19,15 +19,19 @@ import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.HeaderProvider;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class HttpServletRequestHeaderProvider implements HeaderProvider {
 
     private final HttpServletRequest request;
     private final Map<String, String> nameMappings;
+
+    public static final String NAME_CONTENT_LENGTH = "content-length";
 
     public HttpServletRequestHeaderProvider(HttpServletRequest request) {
         this.request = request;
@@ -35,10 +39,24 @@ public class HttpServletRequestHeaderProvider implements HeaderProvider {
                 .collect(Collectors.toMap(Signatures::canonicalizeName, (n) -> n)));
     }
 
+    public static boolean isContentMethod(String method) {
+        return "post".equals(method.toLowerCase());
+    }
+
     @Override
     public String[] get(String name) {
-        String mappedName = nameMappings.get(Signatures.canonicalizeName(name));
+        String canonicalName = Signatures.canonicalizeName(name);
+        String mappedName = nameMappings.get(canonicalName);
+
         if (mappedName == null) {
+            switch (canonicalName) {
+                case NAME_CONTENT_LENGTH:
+                    return isContentMethod(request.getMethod())
+                            ? new String[] { Integer.toString(request.getContentLength()) }
+                            : null;
+                default:
+                    break;
+            }
             return null;
         }
 

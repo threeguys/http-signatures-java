@@ -31,7 +31,6 @@ import java.security.PrivateKey;
 import java.util.List;
 
 @Configuration
-@Import(SignaturesConfiguration.class)
 public class HttpSignerConfiguration {
 
     @Value("${signer.expirationSec:60}")

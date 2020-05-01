@@ -22,6 +22,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import threeguys.http.signing.HttpSigner;
 import threeguys.http.signing.Signatures;
 import threeguys.http.signing.exceptions.InvalidSignatureException;
+import threeguys.http.signing.servlet.HttpServletRequestHeaderProvider;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,10 +37,15 @@ public class SigningClientHttpRequestInterceptor implements ClientHttpRequestInt
     }
 
     private Optional<String []> headers(HttpRequest request, String name) {
+        if ("Content-Length".equals(name) && !HttpServletRequestHeaderProvider.isContentMethod(request.getMethod().name())) {
+            return Optional.empty();
+        }
+
         List<String> headers = request.getHeaders().get(name);
         if (headers == null) {
             return Optional.empty();
         }
+
         return Optional.of(headers.toArray(new String[]{}));
     }
 

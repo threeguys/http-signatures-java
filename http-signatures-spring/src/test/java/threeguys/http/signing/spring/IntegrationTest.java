@@ -24,19 +24,28 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.KeyProvider;
 import threeguys.http.signing.providers.SimplePrivateKeyProvider;
 import threeguys.http.signing.providers.SimplePublicKeyProvider;
+import threeguys.http.signing.spring.config.SignaturesConfiguration;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -44,9 +53,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static threeguys.http.signing.Signatures.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(
@@ -54,7 +66,9 @@ import static org.junit.Assert.assertNotNull;
         properties = { "signer.keyId=" + IntegrationTest.INTEG_TEST_KEY_ID }
 )
 @Configuration
-@SpringBootApplication()//(exclude = { HttpSignerConfiguration.class, HttpVerifierConfiguration.class })
+@ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SignaturesConfiguration.class))
+@SpringBootApplication(excludeName = "threeguys.http.signing.spring.config.*")
+@ActiveProfiles("unit-test")
 public class IntegrationTest extends SpringBootServletInitializer {
 
     public static final String INTEG_TEST_KEY_ID = "integration-test-key-id";
@@ -104,16 +118,39 @@ public class IntegrationTest extends SpringBootServletInitializer {
 
     }
 
+    @Configuration
+    public static class TestSignaturesConfiguration {
+
+        @Bean
+        public Signatures signatures() {
+            return new Signatures(DEFAULT_ALGORITHM, defaultAlgorithms(), defaultFields(),
+                    Arrays.asList(HEADER_REQUEST_TARGET, HEADER_CREATED, HEADER_EXPIRES,
+                                    "X-Foo-Id", "Content-Length", "Content-MD5"));
+        }
+
+    }
+
     @Component
     public static class TestWebConfigurer implements WebMvcConfigurer {
 
         @Autowired
         private HttpSignatureHandlerInterceptor interceptor;
 
+        @Bean
+        public CommonsRequestLoggingFilter loggingFilter() {
+            CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
+            filter.setIncludeQueryString(true);
+            filter.setIncludeClientInfo(true);
+            filter.setIncludeHeaders(true);
+            filter.setIncludePayload(true);
+            return filter;
+        }
+
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(interceptor);
         }
+
     }
 
     @Test
@@ -121,12 +158,18 @@ public class IntegrationTest extends SpringBootServletInitializer {
         assertNotNull(controller);
         assertNotNull(restTemplate);
 
-        RestTemplate exec = restTemplate.getRestTemplate();
+        String myFooId = "foo-" + Integer.toHexString(new Random().nextInt());
 
+        RestTemplate exec = restTemplate.getRestTemplate();
         exec.getInterceptors().add(interceptor);
+        exec.getClientHttpRequestInitializers().add(new ClientHttpRequestInitializer() {
+            @Override
+            public void initialize(ClientHttpRequest request) {
+                request.getHeaders().add("X-Foo-Id", myFooId);
+            }
+        });
 
         String response = exec.getForObject("http://localhost:" + port + "/?name=dude", String.class);
-
         assertEquals("Hello, dude!", response);
     }
 

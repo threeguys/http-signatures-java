@@ -115,12 +115,6 @@ public class HttpSignerImpl implements HttpSigner {
             signature.initSign(key);
             signature.update(payload.getPlaintext());
             byte [] data = signature.sign();
-            try (FileOutputStream fos = new FileOutputStream("src/test/resources/working/plaintext.txt")) {
-                fos.write(payload.getPlaintext());
-            }
-            try (FileOutputStream fos = new FileOutputStream("src/test/resources/working/rsa256.signed")) {
-                fos.write(data);
-            }
             String encodedSig = Base64.getEncoder().encodeToString(data);
 
             List<String> output = new ArrayList<>();

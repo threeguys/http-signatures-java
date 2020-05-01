@@ -19,16 +19,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import threeguys.http.signing.spring.HttpSignatureHandlerInterceptor;
+import threeguys.http.signing.spring.config.SignaturesConfiguration;
+import threeguys.http.signing.spring.config.server.HttpVerifierConfiguration;
 
 @SpringBootApplication
-@ComponentScan({
-        "threeguys.http.signing.spring.config.server",
-        "threeguys.http.signing.examples.echo"
-})
+@ComponentScan("threeguys.http.signing.examples.echo")
+@Import({ SignaturesConfiguration.class, HttpVerifierConfiguration.class })
 public class EchoServer {
 
     @Component

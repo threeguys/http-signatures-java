@@ -125,16 +125,21 @@ public class TestHttpVerifierImpl {
         Signatures signatures = new Signatures(DEFAULT_ALGORITHM, defaultAlgorithms(), defaultFields(), headersToInclude);
         Clock clock = Clock.fixed(Instant.ofEpochSecond(12345678), ZoneId.of("UTC"));
 
+        // TODO This is wonky, need to clean how headers are found
         MockHeaderProvider hp = new MockHeaderProvider()
                 .add("Content-Type", "application/json")
+                .add("content-type", "application/json")
                 .add("Content-Length", Integer.toString(postData.length))
+                .add("content-length", Integer.toString(postData.length))
                 .add("Content-MD5", contentHash)
-                .add("X-Custom-Header", "yo man!");
+                .add("content-md5", contentHash)
+                .add("X-Custom-Header", "yo man!")
+                .add("x-custom-header", "yo man!");
 
         HttpSignerImpl signer = new HttpSignerImpl(clock, "rsa-sha256", "unit-test", (n) -> privateKey, headersToInclude, signatures, 100);
 
         System.out.println("------------- BEGIN SIGNING ---------------------");
-        String signature = signer.sign("GET", "/something", hp);
+        String signature = signer.sign("POST", "/something", hp);
         System.out.println("SIGNATURE: " + signature.replace(",", ",\n    "));
         System.out.println("------------- END SIGNING ---------------------");
 
@@ -143,7 +148,7 @@ public class TestHttpVerifierImpl {
         HttpVerifierImpl impl = new HttpVerifierImpl(clock, signatures, new SimplePublicKeyProvider(publicKey), 120);
 
         System.out.println("------------- BEGIN VERIFY ---------------------");
-        impl.verify("GET", "/something", hp);
+        impl.verify("POST", "/something", hp);
         System.out.println("------------- END VERIFY ---------------------");
     }
 

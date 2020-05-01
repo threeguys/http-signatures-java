@@ -54,7 +54,7 @@ public class Signatures {
     private final List<String> fields;
     private final Set<String> fieldIndex;
     private final List<String> headersToInclude;
-    private final Map<String, String> canonicalHeaderMap;
+//    private final Map<String, String> canonicalHeaderMap;
     private final String defaultAlgorithm;
 
     public Signatures() {
@@ -66,8 +66,8 @@ public class Signatures {
         this.algorithms = algorithms;
         this.fields = Collections.unmodifiableList(fields);
         this.headersToInclude = Collections.unmodifiableList(headersToInclude);
-        this.canonicalHeaderMap = headersToInclude.stream()
-                .collect(Collectors.toMap(Signatures::canonicalizeName, (h) -> h));
+//        this.canonicalHeaderMap = headersToInclude.stream()
+//                .collect(Collectors.toMap(Signatures::canonicalizeName, (h) -> h));
         this.fieldIndex = Collections.unmodifiableSet(new HashSet<>(fields));
     }
 
@@ -167,9 +167,11 @@ public class Signatures {
 
                 } else {
                     // TODO I don't like this hack..., we should do better
-                    String[] values = canonicalHeaderMap.containsKey(hdr)
-                            ? provider.get(canonicalHeaderMap.get(hdr))
-                            : provider.get(hdr);
+//                    String[] values = canonicalHeaderMap.containsKey(hdr)
+//                            ? provider.get(canonicalHeaderMap.get(hdr))
+//                            : provider.get(hdr);
+
+                    String [] values = provider.get(hdr);
 
                     if (values != null) {
                         value = canonicalize(hdr, values);
