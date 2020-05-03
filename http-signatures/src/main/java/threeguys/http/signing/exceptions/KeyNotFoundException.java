@@ -25,8 +25,4 @@ public class KeyNotFoundException extends SignatureException {
         super(cause);
     }
 
-    public KeyNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

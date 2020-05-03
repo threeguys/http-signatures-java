@@ -15,12 +15,15 @@
  */
 package threeguys.http.signing;
 
+import threeguys.http.signing.algorithms.SigningAlgorithm;
+import threeguys.http.signing.algorithms.SigningAlgorithms;
 import threeguys.http.signing.exceptions.InvalidSignatureException;
 import threeguys.http.signing.exceptions.MissingHeadersException;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.HeaderProvider;
 
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.util.Arrays;
@@ -50,7 +53,7 @@ public class Signatures {
     public static final String HEADER_CREATED = "(created)";
     public static final String HEADER_EXPIRES = "(expires)";
 
-    private final Map<String, String> algorithms;
+    private final Map<String, SigningAlgorithm> algorithms;
     private final List<String> fields;
     private final Set<String> fieldIndex;
     private final List<String> headersToInclude;
@@ -58,10 +61,10 @@ public class Signatures {
     private final String defaultAlgorithm;
 
     public Signatures() {
-        this("rsa-sha512", defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
+        this("rsa-sha512", SigningAlgorithms.defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
     }
 
-    public Signatures(String defaultAlgorithm, Map<String, String> algorithms, List<String> fields, List<String> headersToInclude) {
+    public Signatures(String defaultAlgorithm, Map<String, SigningAlgorithm> algorithms, List<String> fields, List<String> headersToInclude) {
         this.defaultAlgorithm = defaultAlgorithm;
         this.algorithms = algorithms;
         this.fields = Collections.unmodifiableList(fields);
@@ -71,30 +74,30 @@ public class Signatures {
         this.fieldIndex = Collections.unmodifiableSet(new HashSet<>(fields));
     }
 
-    public static Map<String, String> defaultAlgorithms() {
-        Map<String, String> algos = new HashMap<>();
-        algos.put("rsa-sha256", "SHA256withRSA");
-        algos.put("rsa-sha384", "SHA384withRSA");
-        algos.put("rsa-sha512", "SHA512withRSA");
-        algos.put("ecdsa-sha256", "SHA256withECDSA");
-        algos.put("ecdsa-sha384", "SHA384withECDSA");
-        algos.put("ecdsa-sha512", "SHA512withECDSA");
-        algos.put("hs2019", "RSASSA-PSS");
-        algos.put("rsapss-sha256", "SHA256withRSA/PSS");
-        algos.put("rsapss-sha512", "RSASSA-PSS");
-        return Collections.unmodifiableMap(algos);
-    }
+//    public static Map<String, String> defaultAlgorithms() {
+//        Map<String, String> algos = new HashMap<>();
+//        algos.put("rsa-sha256", "SHA256withRSA");
+//        algos.put("rsa-sha384", "SHA384withRSA");
+//        algos.put("rsa-sha512", "SHA512withRSA");
+//        algos.put("ecdsa-sha256", "SHA256withECDSA");
+//        algos.put("ecdsa-sha384", "SHA384withECDSA");
+//        algos.put("ecdsa-sha512", "SHA512withECDSA");
+//        algos.put("hs2019", "RSASSA-PSS");
+//        algos.put("rsapss-sha256", "SHA256withRSA/PSS");
+//        algos.put("rsapss-sha512", "RSASSA-PSS");
+//        return Collections.unmodifiableMap(algos);
+//    }
 
-    public static Map<String, String> fipsAlgorithms() {
-        Map<String, String> algos = new HashMap<>();
-        algos.put("dsa", "NONEwithDSA");
-        algos.put("dsa-sha1", "SHA1withDSA");
-        algos.put("dsa-sha224", "SHA224withDSA");
-        algos.put("dsa-sha256", "SHA256withDSA");
-        algos.put("dsa-sha384", "SHA384withDSA");
-        algos.put("dsa-sha512", "SHA512withDSA");
-        return Collections.unmodifiableMap(algos);
-    }
+//    public static Map<String, String> fipsAlgorithms() {
+//        Map<String, String> algos = new HashMap<>();
+//        algos.put("dsa", "NONEwithDSA");
+//        algos.put("dsa-sha1", "SHA1withDSA");
+//        algos.put("dsa-sha224", "SHA224withDSA");
+//        algos.put("dsa-sha256", "SHA256withDSA");
+//        algos.put("dsa-sha384", "SHA384withDSA");
+//        algos.put("dsa-sha512", "SHA512withDSA");
+//        return Collections.unmodifiableMap(algos);
+//    }
 
 
     public static List<String> defaultFields() {
@@ -107,18 +110,17 @@ public class Signatures {
         return Arrays.asList(
                 HEADER_REQUEST_TARGET, HEADER_CREATED, HEADER_EXPIRES,
                 "Content-Type", "Content-Location", "Content-Encoding", "Content-MD5",
-                "Content-Disposition", "Content-Language", "Content-Length", "Content-Range",
-                "Content-Security-Policy", "ETag", "Location", "Set-Cookie",
-                "Access-Control-Expose-Headers", "User-Agent");
+                "Content-Language", "Content-Length", "Content-Range", "Digest",
+                "ETag", "Location", "Set-Cookie", "User-Agent");
     }
 
-    public Signature getSignature(String algorithm) throws NoSuchAlgorithmException {
-        String instanceName = algorithms.get(algorithm);
-        System.out.println("Loading signature instance: " + instanceName);
-        return Signature.getInstance(instanceName);
+    public Signature getSignature(String algorithm) throws GeneralSecurityException {
+        SigningAlgorithm algoInstance = algorithms.get(algorithm);
+        System.out.println("Loading signature instance: " + algoInstance.getName());
+        return algoInstance.create();
     }
 
-    public Map<String, String> getAlgorithms() {
+    public Map<String, SigningAlgorithm> getAlgorithms() {
         return algorithms;
     }
 

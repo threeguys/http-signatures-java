@@ -15,6 +15,8 @@
  */
 package threeguys.http.signing;
 
+import threeguys.http.signing.algorithms.SigningAlgorithm;
+import threeguys.http.signing.algorithms.SigningAlgorithms;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.KeyProvider;
 
@@ -30,7 +32,7 @@ public class HttpVerifierBuilder {
     public static final int DEFAULT_MAX_AGE_SEC = 300;
 
     private KeyProvider<PublicKey> keyProvider;
-    private Map<String, String> algorithms;
+    private Map<String, SigningAlgorithm> algorithms;
     private String algorithmList;
     private List<String> fields;
     private List<String> headersToInclude;
@@ -38,7 +40,7 @@ public class HttpVerifierBuilder {
     private int maxAge = -1;
     private Clock clock;
 
-    public HttpVerifierBuilder withAlgorithms(Map<String, String> algorithms) {
+    public HttpVerifierBuilder withAlgorithms(Map<String, SigningAlgorithm> algorithms) {
         this.algorithms = algorithms;
         return this;
     }
@@ -108,10 +110,10 @@ public class HttpVerifierBuilder {
         return output;
     }
 
-    protected Map<String, String> parseAlgorithms(String entry) throws SignatureException {
+    protected Map<String, SigningAlgorithm> parseAlgorithms(String entry) throws SignatureException {
         String [] algoEntries = entry.split(",");
-        Map<String, String> defaultAlgos = Signatures.defaultAlgorithms();
-        Map<String, String> algos = new HashMap<>();
+        Map<String, SigningAlgorithm> defaultAlgos = SigningAlgorithms.defaultAlgorithms();
+        Map<String, SigningAlgorithm> algos = new HashMap<>();
 
         for (String a : algoEntries) {
             if (a.contains("=")) {
@@ -121,7 +123,7 @@ public class HttpVerifierBuilder {
                 }
 
                 // TODO Validate we can actually instantiate the cipher
-                algos.put(entries[0], entries[1]);
+                algos.put(entries[0], new SigningAlgorithm(entries[0], entries[1]));
 
             } else if (defaultAlgos.containsKey(a)) {
                 algos.put(a, defaultAlgos.get(a));
@@ -151,7 +153,7 @@ public class HttpVerifierBuilder {
         if (algorithmList != null) {
             algorithms = parseAlgorithms(algorithmList);
         } else if (algorithms == null) {
-            algorithms = Signatures.defaultAlgorithms();
+            algorithms = SigningAlgorithms.defaultAlgorithms();
         }
 
         if (fieldList != null) {

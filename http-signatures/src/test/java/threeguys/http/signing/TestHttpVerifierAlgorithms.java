@@ -67,8 +67,7 @@ public class TestHttpVerifierAlgorithms {
         Signatures signing = new Signatures();
 
         PrivateKey key = pair.getPrivate();
-        List<String> headers = Arrays.asList(Signatures.HEADER_REQUEST_TARGET, Signatures.HEADER_CREATED, "foo", "bar", "baz");
-        HttpSigner signer = new HttpSignerImpl(algorithm, "test-key", (n) -> key, headers, signing, 300);
+        HttpSigner signer = new HttpSignerImpl(algorithm, "test-key", (n) -> key, signing, 300);
 
         Map<String, String[]> data = new HashMap<>();
         data.put("foo", new String[] { "foo value" });

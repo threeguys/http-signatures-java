@@ -12,7 +12,6 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
-import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_HEADERS;
 import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
@@ -20,7 +19,8 @@ import static threeguys.http.signing.Signatures.FIELD_SIGNATURE;
 import static threeguys.http.signing.Signatures.HEADER;
 import static threeguys.http.signing.Signatures.HEADER_CREATED;
 import static threeguys.http.signing.Signatures.HEADER_REQUEST_TARGET;
-import static threeguys.http.signing.Signatures.defaultAlgorithms;
+
+import static threeguys.http.signing.algorithms.SigningAlgorithms.*;
 
 //
 // A.1 Example Keys

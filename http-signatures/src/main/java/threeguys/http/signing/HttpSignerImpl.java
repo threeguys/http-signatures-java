@@ -21,17 +21,13 @@ import threeguys.http.signing.exceptions.MissingHeadersException;
 import threeguys.http.signing.providers.HeaderProvider;
 import threeguys.http.signing.providers.KeyProvider;
 
-import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
@@ -46,32 +42,25 @@ public class HttpSignerImpl implements HttpSigner {
     private final String algorithm;
     private String keyId;
     private final KeyProvider<PrivateKey> privateKey;
-    private final List<String> headers;
     private final Signatures signing;
     private final int expirationSec;
 
     private String algorithmValue;
-    private String headersValue;
 
-    public HttpSignerImpl(String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, List<String> headers, Signatures signing, int expirationSec) throws InvalidSignatureException {
-        this(Clock.systemUTC(), algorithm, keyId, privateKey, headers, signing, expirationSec);
+    public HttpSignerImpl(String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, Signatures signing, int expirationSec) throws InvalidSignatureException {
+        this(Clock.systemUTC(), algorithm, keyId, privateKey, signing, expirationSec);
     }
 
-    public HttpSignerImpl(Clock clock, String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, List<String> headers, Signatures signing, int expirationSec) throws InvalidSignatureException {
+    public HttpSignerImpl(Clock clock, String algorithm, String keyId, KeyProvider<PrivateKey> privateKey, Signatures signing, int expirationSec) throws InvalidSignatureException {
         this.clock = clock;
         this.algorithm = algorithm;
         this.keyId = keyId;
         this.privateKey = privateKey;
-        this.headers = headers;
         this.signing = signing;
         this.expirationSec = expirationSec;
 
         // These are just optimizations
         this.algorithmValue = makeValue(algorithm);
-        this.headersValue = makeValue(headers.stream()
-                .map(String::toLowerCase)
-                .map(String::trim)
-                .collect(Collectors.joining(" ")));
     }
 
     private String makeValue(String value) throws InvalidSignatureException {
@@ -80,17 +69,6 @@ public class HttpSignerImpl implements HttpSigner {
         }
 
         return "\"" + value + "\"";
-    }
-
-    private String signPayload(String algorithm, PrivateKey privateKey, byte [] payload) throws InvalidSignatureException {
-        try {
-            Signature signature = signing.getSignature(algorithm);
-            signature.initSign(privateKey);
-            signature.update(payload);
-            return Base64.getEncoder().encodeToString(signature.sign());
-        } catch (NoSuchAlgorithmException | InvalidKeyException | java.security.SignatureException e) {
-            throw new InvalidSignatureException(e);
-        }
     }
 
     public void setKeyId(String keyId) {

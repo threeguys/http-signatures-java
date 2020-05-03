@@ -1,9 +1,8 @@
 package threeguys.http.signing.algorithms;
 
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Objects;
 
 public class SigningAlgorithm {
 
@@ -16,26 +15,49 @@ public class SigningAlgorithm {
     }
 
     public SigningAlgorithm(String identifier, String algorithm, String provider) {
+        if (algorithm == null || identifier == null) {
+            throw new NullPointerException();
+        }
         this.identifier = identifier;
         this.algorithm = algorithm;
         this.provider = provider;
     }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getName() {
+        return getIdentifier() + "/" + getAlgorithm() + "/" + getProvider();
+    }
+
 
     public Signature create() throws GeneralSecurityException {
         return (provider == null) ? Signature.getInstance(algorithm)
                 : Signature.getInstance(algorithm, provider);
     }
 
-    public Signature verifier(PublicKey key) throws GeneralSecurityException {
-        Signature signature = create();
-        signature.initVerify(key);
-        return signature;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SigningAlgorithm that = (SigningAlgorithm) o;
+        return identifier.equals(that.identifier) &&
+                algorithm.equals(that.algorithm) &&
+                Objects.equals(provider, that.provider);
     }
 
-    public Signature signer(PrivateKey key) throws GeneralSecurityException {
-        Signature signature = create();
-        signature.initSign(key);
-        return signature;
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier, algorithm, provider);
     }
 
 }

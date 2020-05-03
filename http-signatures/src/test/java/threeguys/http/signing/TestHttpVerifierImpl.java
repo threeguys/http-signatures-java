@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_HEADERS;
@@ -31,11 +32,9 @@ import static threeguys.http.signing.Signatures.FIELD_SIGNATURE;
 import static threeguys.http.signing.Signatures.HEADER;
 import static threeguys.http.signing.Signatures.HEADER_CREATED;
 import static threeguys.http.signing.Signatures.HEADER_REQUEST_TARGET;
-import static threeguys.http.signing.Signatures.defaultAlgorithms;
 import static threeguys.http.signing.Signatures.defaultFields;
 import static threeguys.http.signing.Signatures.defaultHeadersToInclude;
-
-import static org.junit.Assert.*;
+import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorithms;
 
 public class TestHttpVerifierImpl {
 
@@ -75,8 +74,8 @@ public class TestHttpVerifierImpl {
 
         List<String> headersToInclude = Arrays.asList(HEADER_REQUEST_TARGET, HEADER_CREATED);
         List<String> fields = Arrays.asList(FIELD_KEY_ID, FIELD_CREATED, FIELD_HEADERS, FIELD_SIGNATURE);
-        Signatures signatures = new Signatures(DEFAULT_ALGORITHM, defaultAlgorithms(), fields, headersToInclude);
-        PublicKey publicKey = MockKeys.classpathPublicKey("rfc.public.pem");
+        Signatures signatures = new Signatures("rsapss-sha512", defaultAlgorithms(), fields, headersToInclude);
+        PublicKey publicKey = MockKeys.classpathPublicKey("test.public.pem");
 
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1402170695), ZoneId.of("UTC"));
         HttpVerifierImpl verifier = new HttpVerifierImpl(clock, signatures, (n) -> publicKey, 3600);
@@ -109,8 +108,8 @@ public class TestHttpVerifierImpl {
     @Test
     public void something() throws Exception {
         byte [] postData = "{\"data\": 42.0}".getBytes(StandardCharsets.UTF_8);
-        PublicKey publicKey = MockKeys.classpathPublicKey("unit-test.public.pem");
-        PrivateKey privateKey = MockKeys.classpathPrivateKey("unit-test.private.pem");
+        PublicKey publicKey = MockKeys.classpathPublicKey("test.public.pem");
+        PrivateKey privateKey = MockKeys.classpathPrivateKey("test.private.pem");
 
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.digest(postData);
@@ -136,7 +135,7 @@ public class TestHttpVerifierImpl {
                 .add("X-Custom-Header", "yo man!")
                 .add("x-custom-header", "yo man!");
 
-        HttpSignerImpl signer = new HttpSignerImpl(clock, "rsa-sha256", "unit-test", (n) -> privateKey, headersToInclude, signatures, 100);
+        HttpSignerImpl signer = new HttpSignerImpl(clock, "rsa-sha256", "unit-test", (n) -> privateKey, signatures, 100);
 
         System.out.println("------------- BEGIN SIGNING ---------------------");
         String signature = signer.sign("POST", "/something", hp);
