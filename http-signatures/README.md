@@ -24,3 +24,13 @@ been well published before it made it into this repo.
 ```
 openssl rsa -in private.pem -text -noout
 ```
+
+## Open Questions
+
+### Verification of examples in the RFC
+I am still unable to verify the examples posted in the RFC using OpenSSL, waiting to figure this one out.
+Right now, the library is self verifying.
+
+### Trailing newlines in the input
+The spec is not entirely clear on if there is a final newline. It makes my code easier if there is so for now,
+I'm assuming a newline is appropriate and the library uses it.

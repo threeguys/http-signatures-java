@@ -1,0 +1,5 @@
+{
+  "method": "POST",
+  "url": "/foo?bar=biz",
+  "created": 1588537213
+}

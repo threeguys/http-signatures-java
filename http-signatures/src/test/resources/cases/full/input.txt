@@ -1,0 +1,14 @@
+(request-target): post /foo?bar=biz
+(created): 1588537213
+(expires): 1588537333
+content-type: application/json
+content-length: 189
+content-location: /foo
+content-encoding: identity
+content-md5: c044dea0c966e72dc2d350acc962f378
+content-language: en_US
+content-range: 0-189
+location: /web/foo
+etag: 2aaf357fee36c5d5749eba4426e65476
+set-cookie: cookie=yo
+user-agent: curl/0.42

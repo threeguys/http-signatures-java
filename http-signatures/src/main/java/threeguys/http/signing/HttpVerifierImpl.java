@@ -100,7 +100,7 @@ public class HttpVerifierImpl implements HttpVerifier {
         Map<String, String> fields = new HashMap<>();
         String working = signatureValue;
         while(working.length() > 0) {
-
+            System.err.println("PARSE: " + working);
             Matcher m = regex.matcher(working);
             if (m.lookingAt()) {
                 String name = m.group(1);
@@ -162,39 +162,23 @@ public class HttpVerifierImpl implements HttpVerifier {
             // Check the key parameters
             // these will throw exceptions if the values are not found
             String algorithm = fields.getOrDefault(FIELD_ALGORITHM, signing.getDefaultAlgorithm());
-            System.out.println("Verifying with algorithm: " + algorithm);
 
             Signature signature = signing.getSignature(algorithm);
-//            System.out.println("Provider keys: "
-//                    + signature.getProvider().keySet().stream().map(Object::toString)
-//                    .collect(Collectors.joining(",\n    ")));
 
             String keyId = fields.get(FIELD_KEY_ID);
             PublicKey key = keyProvider.get(keyId);
-            System.out.println("KEY: " + key.getFormat() + " ALGO: " + key.getAlgorithm());
-//            signature.setParameter(new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 20, 1));
-
-
-//            System.out.println("  algo: " + signature.getParameters().getAlgorithm() + " name: " + signature.getParameters().getProvider().getName());
-
 
             // Verify the signature
             signature.initVerify(key);
 
-            System.out.println("Checking HEADERS: " + fields.get(FIELD_HEADERS));
             List<String> headers = Arrays.asList(fields.get(FIELD_HEADERS).split(" "));
-            System.out.println("After split HEADERS: " + headers.toString());
-
             Payload payload = signing.assemblePayload(method, url, provider, created, expires, headers);
-            System.out.println("HEADERS: " + payload.getHeaders());
-            System.out.println("CALCULATED payload: [" + new String(payload.getPlaintext(), StandardCharsets.UTF_8) + "]");
             signature.update(payload.getPlaintext());
 
             if (!payload.getHeaders().equals(fields.get(FIELD_HEADERS))) {
                 throw new InvalidSignatureException("Headers fields did not match");
             }
 
-            System.out.println("Signature was: [" + fields.get(FIELD_SIGNATURE) + "]");
             byte [] data = Base64.getDecoder().decode(fields.get(FIELD_SIGNATURE));
             if (!signature.verify(data)) {
                 throw new InvalidSignatureException("The signature was not verified");

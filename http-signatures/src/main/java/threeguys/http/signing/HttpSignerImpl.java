@@ -85,9 +85,6 @@ public class HttpSignerImpl implements HttpSigner {
             long expires = created + expirationSec;
             Payload payload = signing.assemblePayload(method, url, provider, created, expires);
 
-            System.out.println("Signing HEADERS: [" + payload.getHeaders() + "]");
-            System.out.println("Signing PAYLOAD: [" + new String(payload.getPlaintext(), StandardCharsets.UTF_8) + "]");
-
             // Create the signature
             Signature signature = signing.getSignature(algorithm);
             signature.initSign(key);

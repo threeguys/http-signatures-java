@@ -1,0 +1,13 @@
+{
+  "Content-Type": "application/json",
+  "Content-Length": "189",
+  "Content-Location": "/foo",
+  "Content-Encoding": "identity",
+  "Content-MD5": "c044dea0c966e72dc2d350acc962f378",
+  "Content-Language": "en_US",
+  "Content-Range": "0-189",
+  "Location": "/web/foo",
+  "ETag": "2aaf357fee36c5d5749eba4426e65476",
+  "Set-Cookie": "cookie=yo",
+  "User-Agent": "curl/0.42"
+}

@@ -1,3 +1,18 @@
+/**
+ *    Copyright 2020 Ray Cole
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package threeguys.http.signing;
 
 import org.junit.Ignore;
@@ -10,6 +25,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
@@ -21,6 +37,7 @@ import static threeguys.http.signing.Signatures.HEADER_CREATED;
 import static threeguys.http.signing.Signatures.HEADER_REQUEST_TARGET;
 
 import static threeguys.http.signing.algorithms.SigningAlgorithms.*;
+import static org.junit.Assert.*;
 
 //
 // A.1 Example Keys
@@ -165,7 +182,7 @@ public class RfcExamplesHttpVerifier {
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1402170695), ZoneId.of("UTC"));
         HttpVerifierImpl verifier = new HttpVerifierImpl(clock, signatures, (n) -> publicKey, 3600);
         VerificationResult result = verifier.verify(METHOD, URL, hp);
-        System.out.println(result.getFields());
+        assertEquals(new HashSet<>(Arrays.asList("(request-target)", "(created)", "(expires)")), result.getFields().keySet());
     }
 
 }

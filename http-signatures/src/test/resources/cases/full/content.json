@@ -1,0 +1,11 @@
+{
+    "client": 1234,
+    "product": 7889,
+    "divisions": ["a","b","c"],
+    "breakdown": {
+        "north": 0.5,
+        "south": 0.65,
+        "east": 0.24,
+        "west": 3.2
+    }
+}

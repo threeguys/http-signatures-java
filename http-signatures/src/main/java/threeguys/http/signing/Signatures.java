@@ -116,7 +116,6 @@ public class Signatures {
 
     public Signature getSignature(String algorithm) throws GeneralSecurityException {
         SigningAlgorithm algoInstance = algorithms.get(algorithm);
-        System.out.println("Loading signature instance: " + algoInstance.getName());
         return algoInstance.create();
     }
 
@@ -184,10 +183,11 @@ public class Signatures {
                 }
 
                 if (value != null) {
-                    if (sb.length() > 0) {
-                        sb.append("\n");
-                    }
-                    sb.append(value);
+                    // TODO Should this have a trailing newline?
+//                    if (sb.length() > 0) {
+//                        sb.append("\n");
+//                    }
+                    sb.append(value).append("\n");
                 }
             }
 
