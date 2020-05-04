@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import threeguys.http.signing.Signatures;
@@ -58,7 +57,12 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static threeguys.http.signing.Signatures.*;
+import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
+import static threeguys.http.signing.Signatures.HEADER_CREATED;
+import static threeguys.http.signing.Signatures.HEADER_EXPIRES;
+import static threeguys.http.signing.Signatures.HEADER_REQUEST_TARGET;
+import static threeguys.http.signing.Signatures.defaultFields;
+import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorithms;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(

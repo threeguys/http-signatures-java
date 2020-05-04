@@ -25,6 +25,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
 import threeguys.http.signing.Signatures;
+import threeguys.http.signing.algorithms.SigningAlgorithm;
+import threeguys.http.signing.algorithms.SigningAlgorithms;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.mocks.MockHttpVerifier;
 
@@ -120,10 +122,10 @@ public class TestHttpSignatureVerifierFilter {
         assertEquals(1234, impl.getMaxCreateAgeSec());
         assertEquals(Arrays.asList("(request-target)", "(created)", "host", "content-type"), impl.getSigning().getFields());
 
-        Map<String, String> expectedAlgos = new HashMap<>();
-        expectedAlgos.put("rsa-sha256", Signatures.defaultAlgorithms().get("rsa-sha256"));
-        expectedAlgos.put("ecdsa-sha256", Signatures.defaultAlgorithms().get("ecdsa-sha256"));
-        expectedAlgos.put("my-custom", "SomthingThatDoesntExist");
+        Map<String, SigningAlgorithm> expectedAlgos = new HashMap<>();
+        expectedAlgos.put("rsa-sha256", SigningAlgorithms.defaultAlgorithms().get("rsa-sha256"));
+        expectedAlgos.put("ecdsa-sha256", SigningAlgorithms.defaultAlgorithms().get("ecdsa-sha256"));
+        expectedAlgos.put("my-custom", new SigningAlgorithm("my-custom", "SomthingThatDoesntExist"));
         assertEquals(expectedAlgos, impl.getSigning().getAlgorithms());
 
         filter.destroy();

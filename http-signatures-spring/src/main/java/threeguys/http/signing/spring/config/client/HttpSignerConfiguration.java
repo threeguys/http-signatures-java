@@ -40,8 +40,8 @@ public class HttpSignerConfiguration {
     private String keyId;
 
     @Bean
-    public HttpSigner signer(KeyProvider<PrivateKey> keyProvider, List<String> headersToSign, Signatures signatures) throws InvalidSignatureException {
-        return new HttpSignerImpl("ecdsa-sha256", keyId, keyProvider, headersToSign, signatures, expirationSec);
+    public HttpSigner signer(KeyProvider<PrivateKey> keyProvider, Signatures signatures) throws InvalidSignatureException {
+        return new HttpSignerImpl("ecdsa-sha256", keyId, keyProvider, signatures, expirationSec);
     }
 
     @Bean
