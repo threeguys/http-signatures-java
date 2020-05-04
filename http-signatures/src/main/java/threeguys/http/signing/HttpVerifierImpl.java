@@ -100,7 +100,6 @@ public class HttpVerifierImpl implements HttpVerifier {
         Map<String, String> fields = new HashMap<>();
         String working = signatureValue;
         while(working.length() > 0) {
-            System.err.println("PARSE: " + working);
             Matcher m = regex.matcher(working);
             if (m.lookingAt()) {
                 String name = m.group(1);
