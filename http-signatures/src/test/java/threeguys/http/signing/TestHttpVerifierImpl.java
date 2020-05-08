@@ -17,7 +17,6 @@ package threeguys.http.signing;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import threeguys.http.signing.providers.MockHeaderProvider;
 import threeguys.http.signing.providers.MockKeys;
@@ -60,7 +59,6 @@ public class TestHttpVerifierImpl {
         }
     }
 
-    @Ignore
     @Test
     public void rfcExample() throws Exception {
         // https://tools.ietf.org/id/draft-ietf-httpbis-message-signatures-00.html#section-a.3.1.1
@@ -89,7 +87,7 @@ public class TestHttpVerifierImpl {
 
         List<String> headersToInclude = Arrays.asList(HEADER_REQUEST_TARGET, HEADER_CREATED);
         List<String> fields = Arrays.asList(FIELD_KEY_ID, FIELD_CREATED, FIELD_HEADERS, FIELD_SIGNATURE);
-        Signatures signatures = new Signatures("rsapss-sha512", defaultAlgorithms(), fields, headersToInclude);
+        Signatures signatures = new Signatures("rsa-sha256", defaultAlgorithms(), fields, headersToInclude);
         PublicKey publicKey = MockKeys.classpathPublicKey("test.public.pem");
 
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1402170695), ZoneId.of("UTC"));
@@ -97,11 +95,18 @@ public class TestHttpVerifierImpl {
         VerificationResult result = verifier.verify(method, url, hp);
         assertEquals("test-key-a", result.getKeyId());
         assertEquals(publicKey, result.getKey());
-        assertEquals("rsa-256", result.getAlgorithm());
+        assertEquals("rsa-sha256", result.getAlgorithm());
 
         Map<String, String> expected = new HashMap<>();
         expected.put(FIELD_KEY_ID, "test-key-a");
         expected.put(FIELD_CREATED, "1402170695");
+        expected.put(FIELD_HEADERS, "(created) (request-target)");
+        expected.put(FIELD_SIGNATURE, "e3y37nxAoeuXw2KbaIxE2d9jpE7Z9okgizg6QbD2Z7fUVUvog+ZTKK" +
+                "LRBnhNglVIY6fAaYlHwx7ZAXXdBVF8gjWBPL6U9zRrB4PFzjoLSxHaqsvS0ZK" +
+                "9FRxpenptgukaVQ1aeva3PE1aD6zZ93df2lFIFXGDefYCQ+M/SrDGQOFvaVyk" +
+                "Ekte5mO6zQZ/HpokjMKvilfSMJS+vbvC1GJItQpjs636Db+7zB2W1BurkGxtQ" +
+                "dCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXwHOUkVG6Q2ge07IYdzya6N1" +
+                "fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg==");
         assertEquals(expected, result.getFields());
     }
 
@@ -120,6 +125,7 @@ public class TestHttpVerifierImpl {
 //    "C1GJItQpjs636Db+7zB2W1BurkGxtQdCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXw"
 //    "HOUkVG6Q2ge07IYdzya6N1fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg=="
 
+    // TODO This test needs some work
     @Test
     public void something() throws Exception {
         byte [] postData = "{\"data\": 42.0}".getBytes(StandardCharsets.UTF_8);

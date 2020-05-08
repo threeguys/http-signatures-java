@@ -17,9 +17,11 @@ package threeguys.http.signing;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.MockHeaderProvider;
 import threeguys.http.signing.providers.MockKeys;
 
+import java.io.IOException;
 import java.security.PublicKey;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,7 +29,9 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertEquals;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_HEADERS;
 import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
@@ -35,9 +39,7 @@ import static threeguys.http.signing.Signatures.FIELD_SIGNATURE;
 import static threeguys.http.signing.Signatures.HEADER;
 import static threeguys.http.signing.Signatures.HEADER_CREATED;
 import static threeguys.http.signing.Signatures.HEADER_REQUEST_TARGET;
-
-import static threeguys.http.signing.algorithms.SigningAlgorithms.*;
-import static org.junit.Assert.*;
+import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorithms;
 
 //
 // A.1 Example Keys
@@ -98,7 +100,6 @@ import static org.junit.Assert.*;
 //
 //    {"hello": "world"}
 //
-@Ignore
 public class RfcExamplesHttpVerifier {
 
     public static final String METHOD = "POST";
@@ -124,7 +125,6 @@ public class RfcExamplesHttpVerifier {
         }
         return hp;
     }
-
 
 //
 // Test Case A.3.1.1
@@ -161,28 +161,52 @@ public class RfcExamplesHttpVerifier {
 //        dCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXwHOUkVG6Q2ge07IYdzya6N1
 //        fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg=="
 
-    String signatureA311 =
-        "keyId=\"test-key-a\", created=1402170695, " +
-            "headers=\"(created) (request-target)\", " +
-            "signature=\"e3y37nxAoeuXw2KbaIxE2d9jpE7Z9okgizg6QbD2Z7fUVUvog+ZTKK" +
-                "LRBnhNglVIY6fAaYlHwx7ZAXXdBVF8gjWBPL6U9zRrB4PFzjoLSxHaqsvS0ZK" +
-                "9FRxpenptgukaVQ1aeva3PE1aD6zZ93df2lFIFXGDefYCQ+M/SrDGQOFvaVyk" +
-                "Ekte5mO6zQZ/HpokjMKvilfSMJS+vbvC1GJItQpjs636Db+7zB2W1BurkGxtQ" +
-                "dCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXwHOUkVG6Q2ge07IYdzya6N1" +
-                "fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg==\"";
 
-    @Test
-    public void verifyA311_hs2019_signature_over_minimal_recommended_content() throws Exception {
-        MockHeaderProvider hp = headersA3Plus(HEADER, signatureA311);
+    private void verify_signature_over_minimal_recommended_content(String expectedAlgorithm, String signatureValue) throws IOException, SignatureException {
+        MockHeaderProvider hp = headersA3Plus(HEADER, signatureValue);
         List<String> headersToInclude = Arrays.asList(HEADER_REQUEST_TARGET, HEADER_CREATED);
         List<String> fields = Arrays.asList(FIELD_KEY_ID, FIELD_CREATED, FIELD_HEADERS, FIELD_SIGNATURE);
-        Signatures signatures = new Signatures("rsapss-sha512", defaultAlgorithms(), fields, headersToInclude);
-        PublicKey publicKey = MockKeys.classpathPublicKey("rfc.public.pem");
+        Signatures signatures = new Signatures(expectedAlgorithm, defaultAlgorithms(), fields, headersToInclude);
+        PublicKey publicKey = MockKeys.classpathPublicKey("test.public.pem");
 
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1402170695), ZoneId.of("UTC"));
         HttpVerifierImpl verifier = new HttpVerifierImpl(clock, signatures, (n) -> publicKey, 3600);
         VerificationResult result = verifier.verify(METHOD, URL, hp);
-        assertEquals(new HashSet<>(Arrays.asList("(request-target)", "(created)", "(expires)")), result.getFields().keySet());
+        assertEquals(new HashSet<>(Arrays.asList("headers", "signature", "created", "keyId")), result.getFields().keySet());
+        assertEquals(publicKey, result.getKey());
+        assertEquals(expectedAlgorithm, result.getAlgorithm());
+        assertEquals("test-key-a", result.getKeyId());
+        assertEquals(new HashSet<>(Arrays.asList("(created)", "(request-target)")),
+                Arrays.stream(result.getFields().get("headers").split(" "))
+                        .collect(Collectors.toSet()));
+    }
+
+    @Test
+    public void verifyA311_hs2019_signature_over_minimal_recommended_content_rsa_sha256() throws Exception {
+        // As per the author, this is actually rsa-sha256 algorithm by mistake, updates incoming
+        // but never miss a chance to try a different test!
+        verify_signature_over_minimal_recommended_content("rsa-sha256",
+                "keyId=\"test-key-a\", created=1402170695, " +
+                        "headers=\"(created) (request-target)\", " +
+                        "signature=\"e3y37nxAoeuXw2KbaIxE2d9jpE7Z9okgizg6QbD2Z7fUVUvog+ZTKK" +
+                        "LRBnhNglVIY6fAaYlHwx7ZAXXdBVF8gjWBPL6U9zRrB4PFzjoLSxHaqsvS0ZK" +
+                        "9FRxpenptgukaVQ1aeva3PE1aD6zZ93df2lFIFXGDefYCQ+M/SrDGQOFvaVyk" +
+                        "Ekte5mO6zQZ/HpokjMKvilfSMJS+vbvC1GJItQpjs636Db+7zB2W1BurkGxtQ" +
+                        "dCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXwHOUkVG6Q2ge07IYdzya6N1" +
+                        "fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg==\"");
+    }
+
+    @Ignore
+    @Test
+    public void verifyA311_hs2019_signature_over_minimal_recommended_content_rsapss_sha512() throws IOException, SignatureException {
+        verify_signature_over_minimal_recommended_content("rsapss-sha512",
+                "keyId=\"test-key-a\", created=1402170695, " +
+                        "headers=\"(created) (request-target)\", " +
+                        "signature=\"fUwkSsSFiwzb2zFdPdzwp67TFGTR5jKA1aAd5Ytvw3sDkvBdDoW557rkX8BChuBGmEO0G7Q4hp+lRIoJ" +
+                        "xwYUh/4Sv6JjW4/CSnNTd78Nb4ZfRtDS9DB5gymlRZ+XygZ9usSovvLR9zJO6ntXMTjhjnEAdQofZOzG" +
+                        "eQgNVcxBVCMf0MjttW4tYmI5V/FOqG1qv/7TIaoBDurtvZJXuwsux3KuRV0JcV+Brv06t5caAgEP2YCd" +
+                        "WocpdKzWyeXcQaYaq/u7TiduUeAQX/4+mCGRGCaGbSZp2NIRynmaOKsG/qy1x0afhFfUD7ql2CKDfpSx" +
+                        "KS2+EoZ5HetKip2WQf4WSQ==\"");
     }
 
 }

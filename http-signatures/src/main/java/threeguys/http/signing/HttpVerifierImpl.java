@@ -15,17 +15,15 @@
  */
 package threeguys.http.signing;
 
+import threeguys.http.signing.algorithms.SigningAlgorithm;
 import threeguys.http.signing.exceptions.ExpiredSignatureException;
 import threeguys.http.signing.exceptions.InvalidSignatureException;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.HeaderProvider;
 import threeguys.http.signing.providers.KeyProvider;
 
-import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Base64;
@@ -37,7 +35,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_EXPIRES;
@@ -161,8 +158,8 @@ public class HttpVerifierImpl implements HttpVerifier {
             // Check the key parameters
             // these will throw exceptions if the values are not found
             String algorithm = fields.getOrDefault(FIELD_ALGORITHM, signing.getDefaultAlgorithm());
-
-            Signature signature = signing.getSignature(algorithm);
+            SigningAlgorithm signingAlgo = signing.getAlgorithm(algorithm);
+            Signature signature = signingAlgo.create();
 
             String keyId = fields.get(FIELD_KEY_ID);
             PublicKey key = keyProvider.get(keyId);
@@ -184,7 +181,7 @@ public class HttpVerifierImpl implements HttpVerifier {
             }
 
             // Woot! we're good!
-            return new VerificationResult(key, fields);
+            return new VerificationResult(key, signingAlgo.getIdentifier(), fields);
 
         } catch (Exception e) {
             if (e instanceof SignatureException) {

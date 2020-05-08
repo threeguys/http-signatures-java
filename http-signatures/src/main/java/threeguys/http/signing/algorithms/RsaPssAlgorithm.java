@@ -9,7 +9,7 @@ public class RsaPssAlgorithm extends SigningAlgorithm {
 
     public static final String ALGORITHM = "RSASSA-PSS";
     public static final String MASK_FUNCTION = "MGF1";
-    public static final int SALT_LENGTH = 0;
+    public static final int SALT_LENGTH = 32;
     public static final int TRAILER_FIELD = 1;
 
     private final String hashName;

@@ -42,12 +42,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
-import static threeguys.http.signing.Signatures.canonicalizeName;
 import static threeguys.http.signing.Signatures.defaultFields;
 import static threeguys.http.signing.Signatures.defaultHeadersToInclude;
 import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorithms;
@@ -129,29 +126,5 @@ public class TestCasesVerify {
     public void tests() throws IOException, SignatureException {
         verify(keyName, caseName, algorithm, expectedKey);
     }
-
-//    @Test
-//    public void setup() throws IOException, SignatureException {
-//        PublicKey publicKey = MockKeys.classpathPublicKey("test.public.pem");
-//
-//        Map<String, String> headers = readMap("cases/full/headers.json");
-//        Map<String, String> request = readMap("cases/full/request.json");
-//        String sig = readSignature("cases/full/signature.rsa-sha256");
-//
-//        Signatures signatures = new Signatures(DEFAULT_ALGORITHM, defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
-//
-//        Clock clock = Clock.fixed(Instant.ofEpochSecond(Long.parseLong(request.get("created"))), ZoneId.of("UTC"));
-//
-//        MockHeaderProvider hp = new MockHeaderProvider(headers.entrySet().stream()
-//                .collect(Collectors.toMap(Map.Entry::getKey, e -> new String[] { e.getValue() })));
-//        hp.add(Signatures.HEADER, sig);
-//
-//        HttpVerifierImpl impl = new HttpVerifierImpl(clock, signatures, new SimplePublicKeyProvider(publicKey), 120);
-//        VerificationResult result = impl.verify(request.get("method"), request.get("url"), hp);
-//
-//        assertEquals("full", result.getKeyId());
-//        assertEquals(publicKey, result.getKey());
-//        System.out.println(result.getFields());
-//    }
 
 }

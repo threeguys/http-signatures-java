@@ -24,11 +24,9 @@ import threeguys.http.signing.providers.HeaderProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +55,6 @@ public class Signatures {
     private final List<String> fields;
     private final Set<String> fieldIndex;
     private final List<String> headersToInclude;
-//    private final Map<String, String> canonicalHeaderMap;
     private final String defaultAlgorithm;
 
     public Signatures() {
@@ -69,36 +66,8 @@ public class Signatures {
         this.algorithms = algorithms;
         this.fields = Collections.unmodifiableList(fields);
         this.headersToInclude = Collections.unmodifiableList(headersToInclude);
-//        this.canonicalHeaderMap = headersToInclude.stream()
-//                .collect(Collectors.toMap(Signatures::canonicalizeName, (h) -> h));
         this.fieldIndex = Collections.unmodifiableSet(new HashSet<>(fields));
     }
-
-//    public static Map<String, String> defaultAlgorithms() {
-//        Map<String, String> algos = new HashMap<>();
-//        algos.put("rsa-sha256", "SHA256withRSA");
-//        algos.put("rsa-sha384", "SHA384withRSA");
-//        algos.put("rsa-sha512", "SHA512withRSA");
-//        algos.put("ecdsa-sha256", "SHA256withECDSA");
-//        algos.put("ecdsa-sha384", "SHA384withECDSA");
-//        algos.put("ecdsa-sha512", "SHA512withECDSA");
-//        algos.put("hs2019", "RSASSA-PSS");
-//        algos.put("rsapss-sha256", "SHA256withRSA/PSS");
-//        algos.put("rsapss-sha512", "RSASSA-PSS");
-//        return Collections.unmodifiableMap(algos);
-//    }
-
-//    public static Map<String, String> fipsAlgorithms() {
-//        Map<String, String> algos = new HashMap<>();
-//        algos.put("dsa", "NONEwithDSA");
-//        algos.put("dsa-sha1", "SHA1withDSA");
-//        algos.put("dsa-sha224", "SHA224withDSA");
-//        algos.put("dsa-sha256", "SHA256withDSA");
-//        algos.put("dsa-sha384", "SHA384withDSA");
-//        algos.put("dsa-sha512", "SHA512withDSA");
-//        return Collections.unmodifiableMap(algos);
-//    }
-
 
     public static List<String> defaultFields() {
         return Arrays.asList(
@@ -112,6 +81,10 @@ public class Signatures {
                 "Content-Type", "Content-Location", "Content-Encoding", "Content-MD5",
                 "Content-Language", "Content-Length", "Content-Range", "Digest",
                 "ETag", "Location", "Set-Cookie", "User-Agent");
+    }
+
+    public SigningAlgorithm getAlgorithm(String algorithm) {
+        return algorithms.get(algorithm);
     }
 
     public Signature getSignature(String algorithm) throws GeneralSecurityException {
@@ -167,11 +140,6 @@ public class Signatures {
                     found.add(HEADER_EXPIRES);
 
                 } else {
-                    // TODO I don't like this hack..., we should do better
-//                    String[] values = canonicalHeaderMap.containsKey(hdr)
-//                            ? provider.get(canonicalHeaderMap.get(hdr))
-//                            : provider.get(hdr);
-
                     String [] values = provider.get(hdr);
 
                     if (values != null) {
@@ -183,11 +151,10 @@ public class Signatures {
                 }
 
                 if (value != null) {
-                    // TODO Should this have a trailing newline?
-//                    if (sb.length() > 0) {
-//                        sb.append("\n");
-//                    }
-                    sb.append(value).append("\n");
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(value);
                 }
             }
 

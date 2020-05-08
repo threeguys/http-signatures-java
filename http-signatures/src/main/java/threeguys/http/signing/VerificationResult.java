@@ -24,9 +24,15 @@ public class VerificationResult {
 
     private final Map<String, String> fields;
     private final PublicKey key;
+    private final String algorithm;
 
     public VerificationResult(PublicKey key, Map<String, String> fields) {
+        this(key, fields.get(FIELD_ALGORITHM), fields);
+    }
+
+    public VerificationResult(PublicKey key, String algorithm, Map<String, String> fields) {
         this.key = key;
+        this.algorithm = algorithm;
         this.fields = fields;
     }
 
@@ -39,7 +45,7 @@ public class VerificationResult {
     }
 
     public String getAlgorithm() {
-        return fields.get(FIELD_ALGORITHM);
+        return algorithm;
     }
 
     public String getKeyId() {

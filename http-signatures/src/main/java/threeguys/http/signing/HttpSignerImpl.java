@@ -21,7 +21,6 @@ import threeguys.http.signing.exceptions.MissingHeadersException;
 import threeguys.http.signing.providers.HeaderProvider;
 import threeguys.http.signing.providers.KeyProvider;
 
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.time.Clock;
