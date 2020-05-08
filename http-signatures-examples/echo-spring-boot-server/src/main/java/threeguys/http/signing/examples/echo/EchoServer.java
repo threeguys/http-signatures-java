@@ -18,11 +18,14 @@ package threeguys.http.signing.examples.echo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import threeguys.http.signing.examples.server.InMemoryKeyProvider;
 import threeguys.http.signing.spring.HttpSignatureHandlerInterceptor;
 import threeguys.http.signing.spring.config.SignaturesConfiguration;
 import threeguys.http.signing.spring.config.server.HttpVerifierConfiguration;
@@ -33,7 +36,7 @@ import threeguys.http.signing.spring.config.server.HttpVerifierConfiguration;
 public class EchoServer {
 
     @Component
-    public class WebConfig implements WebMvcConfigurer {
+    public static class WebConfig implements WebMvcConfigurer {
 
         @Autowired
         private HttpSignatureHandlerInterceptor interceptor;
@@ -41,6 +44,16 @@ public class EchoServer {
         @Override
         public void addInterceptors(InterceptorRegistry registry) {
             registry.addInterceptor(interceptor).addPathPatterns("/echo");
+        }
+
+    }
+
+    @Configuration
+    public static class AppConfig {
+
+        @Bean
+        public InMemoryKeyProvider keyProvider() {
+            return new InMemoryKeyProvider();
         }
 
     }

@@ -13,9 +13,8 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing.examples.echo;
+package threeguys.http.signing.examples.server;
 
-import org.springframework.stereotype.Component;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
 import threeguys.http.signing.providers.KeyProvider;
 
@@ -30,7 +29,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-@Component
 public class InMemoryKeyProvider implements KeyProvider<PublicKey> {
 
     public static final int MAX_IN_MEMORY_KEYS = 1000;

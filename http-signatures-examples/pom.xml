@@ -16,6 +16,18 @@
     <modules>
         <module>echo-spring-boot-server</module>
         <module>echo-spring-client</module>
+        <module>echo-netty-server</module>
+        <module>echo-server-common</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.6.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
