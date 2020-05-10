@@ -2,16 +2,17 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 package threeguys.http.signing.examples.server;
 
+import org.bouncycastle.util.io.pem.PemReader;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
 import threeguys.http.signing.providers.KeyProvider;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.io.IOException;
+import java.io.StringReader;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.ECGenParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -47,13 +48,14 @@ public class InMemoryKeyProvider implements KeyProvider<PublicKey> {
         lock.unlock();
     }
 
-    public KeyPair newKeyPair(String keyId) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        ECGenParameterSpec ecSpec = new ECGenParameterSpec("secp256k1");
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-        generator.initialize(ecSpec, new SecureRandom());
-        KeyPair kp = generator.generateKeyPair();
-        keys.put(keyId, kp.getPublic());
-        return kp;
+    public void put(String keyId, String type, String pemData) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        put(keyId, readKey(type, pemData));
+    }
+
+    public PublicKey readKey(String type, String keyPem) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        byte [] keyData = new PemReader(new StringReader(keyPem)).readPemObject().getContent();
+        KeyFactory keyFactory = KeyFactory.getInstance(type);
+        return keyFactory.generatePublic(new X509EncodedKeySpec(keyData));
     }
 
 }

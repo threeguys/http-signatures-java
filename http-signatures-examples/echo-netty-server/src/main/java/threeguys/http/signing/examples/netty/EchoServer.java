@@ -21,11 +21,7 @@ import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
 import threeguys.http.signing.Signatures;
 import threeguys.http.signing.examples.server.InMemoryKeyProvider;
-import threeguys.http.signing.examples.server.ServerHelper;
 import threeguys.http.signing.netty.server.HttpVerifierInboundHandler;
-import threeguys.http.signing.providers.KeyProvider;
-
-import java.security.PublicKey;
 
 public class EchoServer implements Runnable {
 
@@ -37,22 +33,20 @@ public class EchoServer implements Runnable {
         private static final int MAX_HTTP_OBJECT_SIZE = 128 * 1024 * 1024;
 
         private final HttpVerifier verifier;
-        private final ServerHelper helper;
         private final InMemoryKeyProvider keyProvider;
 
-        public ServerInitializer(HttpVerifier verifier, ServerHelper helper, InMemoryKeyProvider keyProvider) {
+        public ServerInitializer(HttpVerifier verifier, InMemoryKeyProvider keyProvider) {
             this.verifier = verifier;
-            this.helper = helper;
             this.keyProvider = keyProvider;
         }
 
         @Override
-        protected void initChannel(Channel ch) throws Exception {
+        protected void initChannel(Channel ch) {
             ChannelPipeline pipeline = ch.pipeline();
             pipeline.addLast(new HttpServerCodec())
                     .addLast(new HttpObjectAggregator(MAX_HTTP_OBJECT_SIZE))
                     .addLast(new LoggingHandler(LogLevel.INFO))
-                    .addLast(new RegisterHandler(helper, keyProvider))
+                    .addLast(new RegisterHandler(keyProvider))
                     .addLast(new HttpVerifierInboundHandler(verifier))
                     .addLast(new EchoServerHandler());
         }
@@ -72,14 +66,13 @@ public class EchoServer implements Runnable {
         Signatures signatures = new Signatures();
         InMemoryKeyProvider provider = new InMemoryKeyProvider();
         HttpVerifier verifier = new HttpVerifierImpl(signatures, provider);
-        ServerHelper helper = new ServerHelper();
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap
                     .group(managerGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ServerInitializer(verifier, helper, provider))
+                    .childHandler(new ServerInitializer(verifier, provider))
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 

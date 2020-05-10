@@ -10,19 +10,15 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import threeguys.http.signing.examples.server.InMemoryKeyProvider;
-import threeguys.http.signing.examples.server.ServerHelper;
 
 import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
 
 public class RegisterHandler extends ChannelInboundHandlerAdapter {
 
-    private final ServerHelper helper;
     private final InMemoryKeyProvider keyProvider;
 
-    public RegisterHandler(ServerHelper helper, InMemoryKeyProvider keyProvider) {
+    public RegisterHandler(InMemoryKeyProvider keyProvider) {
         super();
-        this.helper = helper;
         this.keyProvider = keyProvider;
     }
 
@@ -43,8 +39,7 @@ public class RegisterHandler extends ChannelInboundHandlerAdapter {
                 byte [] data = new byte[buffer.readableBytes()];
                 buffer.getBytes(0, data);
 
-                PublicKey key = helper.readKey(type, new String(data, StandardCharsets.UTF_8));
-                keyProvider.put(keyId, key);
+                keyProvider.put(keyId, type, new String(data, StandardCharsets.UTF_8));
 
                 ctx.write(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
                 ctx.flush();

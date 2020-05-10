@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import threeguys.http.signing.examples.server.InMemoryKeyProvider;
-import threeguys.http.signing.examples.server.ServerHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,11 +27,9 @@ public class EchoController {
 
     private final Gson gson;
     private final InMemoryKeyProvider keyProvider;
-    private final ServerHelper serverHelper;
 
-    public EchoController(@Autowired InMemoryKeyProvider keyProvider, @Autowired ServerHelper serverHelper) {
+    public EchoController(@Autowired InMemoryKeyProvider keyProvider) {
         this.keyProvider = keyProvider;
-        this.serverHelper = serverHelper;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -52,7 +49,7 @@ public class EchoController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public @ResponseBody String register(@RequestParam("id") String keyId, @RequestParam("type") String type, @RequestBody String publicKeyPem) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-        keyProvider.put(keyId, serverHelper.readKey(type, publicKeyPem));
+        keyProvider.put(keyId, type, publicKeyPem);
         return "OK";
     }
 
