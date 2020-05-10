@@ -25,9 +25,9 @@ import io.netty.handler.logging.LoggingHandler;
 import threeguys.http.signing.HttpSigner;
 import threeguys.http.signing.HttpSignerImpl;
 import threeguys.http.signing.Signatures;
-import threeguys.http.signing.examples.echo.client.ClientInfo;
-import threeguys.http.signing.examples.echo.client.ClientOptions;
-import threeguys.http.signing.examples.echo.client.KeyHelper;
+import threeguys.http.signing.examples.client.ClientInfo;
+import threeguys.http.signing.examples.client.ClientOptions;
+import threeguys.http.signing.examples.client.KeyHelper;
 import threeguys.http.signing.netty.client.HttpSigningOutboundHandler;
 import threeguys.http.signing.providers.SimplePrivateKeyProvider;
 

@@ -1,12 +1,11 @@
 /** Any copyright is dedicated to the Public Domain.
  * https://creativecommons.org/publicdomain/zero/1.0/ */
-package threeguys.http.signing.examples.echo;
+package threeguys.http.signing.examples.spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,6 @@ import threeguys.http.signing.spring.config.SignaturesConfiguration;
 import threeguys.http.signing.spring.config.server.HttpVerifierConfiguration;
 
 @SpringBootApplication
-@ComponentScan("threeguys.http.signing.examples.echo")
 @Import({ SignaturesConfiguration.class, HttpVerifierConfiguration.class })
 public class EchoServer {
 

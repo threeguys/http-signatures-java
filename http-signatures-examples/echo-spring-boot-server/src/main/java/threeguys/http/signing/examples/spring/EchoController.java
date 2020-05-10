@@ -1,6 +1,6 @@
 /** Any copyright is dedicated to the Public Domain.
  * https://creativecommons.org/publicdomain/zero/1.0/ */
-package threeguys.http.signing.examples.echo;
+package threeguys.http.signing.examples.spring;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

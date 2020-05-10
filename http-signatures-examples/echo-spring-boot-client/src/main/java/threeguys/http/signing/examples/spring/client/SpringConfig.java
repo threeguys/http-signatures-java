@@ -1,6 +1,6 @@
 /** Any copyright is dedicated to the Public Domain.
  * https://creativecommons.org/publicdomain/zero/1.0/ */
-package threeguys.http.signing.examples.echo.client;
+package threeguys.http.signing.examples.spring.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestTemplate;
+import threeguys.http.signing.examples.client.ClientInfo;
+import threeguys.http.signing.examples.client.KeyHelper;
 import threeguys.http.signing.providers.SimplePrivateKeyProvider;
 import threeguys.http.signing.providers.SimplePublicKeyProvider;
 import threeguys.http.signing.spring.SigningClientHttpRequestInterceptor;
@@ -58,6 +60,11 @@ public class SpringConfig {
     @Bean
     public Gson gson() {
         return new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    @Bean
+    public KeyHelper keyHelper() {
+        return new KeyHelper();
     }
 
     @Bean

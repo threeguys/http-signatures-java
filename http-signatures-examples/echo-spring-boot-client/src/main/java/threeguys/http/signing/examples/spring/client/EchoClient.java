@@ -1,6 +1,6 @@
 /** Any copyright is dedicated to the Public Domain.
  * https://creativecommons.org/publicdomain/zero/1.0/ */
-package threeguys.http.signing.examples.echo.client;
+package threeguys.http.signing.examples.spring.client;
 
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import threeguys.http.signing.examples.client.ClientInfo;
+import threeguys.http.signing.examples.client.ClientOptions;
+import threeguys.http.signing.examples.client.KeyHelper;
 import threeguys.http.signing.providers.SimplePrivateKeyProvider;
 
 import java.io.IOException;
@@ -25,9 +27,6 @@ import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
-@ComponentScan({
-    "threeguys.http.signing.examples.echo.client"
-})
 @SpringBootApplication
 public class EchoClient implements CommandLineRunner {
 

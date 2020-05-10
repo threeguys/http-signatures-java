@@ -1,6 +1,6 @@
 /** Any copyright is dedicated to the Public Domain.
  * https://creativecommons.org/publicdomain/zero/1.0/ */
-package threeguys.http.signing.examples.echo.client;
+package threeguys.http.signing.examples.client;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;

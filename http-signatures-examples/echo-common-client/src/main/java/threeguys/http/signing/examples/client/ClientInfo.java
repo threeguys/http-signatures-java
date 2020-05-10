@@ -1,4 +1,4 @@
-package threeguys.http.signing.examples.echo.client;
+package threeguys.http.signing.examples.client;
 
 import com.google.gson.Gson;
 

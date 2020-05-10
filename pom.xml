@@ -150,12 +150,6 @@
 
     </dependencyManagement>
 
-    <distributionManagement>
-        <repository>
-            <id>threeguys/http-signatures-java</id>
-        </repository>
-    </distributionManagement>
-
     <build>
         <pluginManagement>
             <plugins>
