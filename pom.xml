@@ -16,7 +16,7 @@
 
     <packaging>pom</packaging>
 
-    <name>http-signatures-java Project Root</name>
+    <name>http-signatures-java</name>
     <url>http://github.com/threeguys/http-signatures-java.git</url>
 
     <properties>
@@ -198,6 +198,24 @@
                         </formats>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <phase>initialize</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <overWriteReleases>false</overWriteReleases>
+                                <includeScope>runtime</includeScope>
+                                <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
