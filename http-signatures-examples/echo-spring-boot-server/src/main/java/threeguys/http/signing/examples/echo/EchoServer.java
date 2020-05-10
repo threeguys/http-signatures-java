@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import threeguys.http.signing.examples.server.InMemoryKeyProvider;
+import threeguys.http.signing.examples.server.ServerHelper;
 import threeguys.http.signing.spring.HttpSignatureHandlerInterceptor;
 import threeguys.http.signing.spring.config.SignaturesConfiguration;
 import threeguys.http.signing.spring.config.server.HttpVerifierConfiguration;
@@ -41,6 +42,11 @@ public class EchoServer {
         @Bean
         public InMemoryKeyProvider keyProvider() {
             return new InMemoryKeyProvider();
+        }
+
+        @Bean
+        public ServerHelper helper() {
+            return new ServerHelper();
         }
 
     }

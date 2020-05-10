@@ -15,6 +15,7 @@
  */
 package threeguys.http.signing.netty.client;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -23,6 +24,7 @@ import threeguys.http.signing.HttpSigner;
 import threeguys.http.signing.Signatures;
 import threeguys.http.signing.netty.NettyHeaderProvider;
 
+@ChannelHandler.Sharable
 public class HttpSigningOutboundHandler extends ChannelOutboundHandlerAdapter {
 
     private final HttpSigner signer;

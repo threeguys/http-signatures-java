@@ -5,8 +5,6 @@ package threeguys.http.signing.examples.echo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,18 +14,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import threeguys.http.signing.examples.server.InMemoryKeyProvider;
+import threeguys.http.signing.examples.server.ServerHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Iterator;
 
 @Controller
@@ -35,9 +28,11 @@ public class EchoController {
 
     private final Gson gson;
     private final InMemoryKeyProvider keyProvider;
+    private final ServerHelper serverHelper;
 
-    public EchoController(@Autowired InMemoryKeyProvider keyProvider) {
+    public EchoController(@Autowired InMemoryKeyProvider keyProvider, @Autowired ServerHelper serverHelper) {
         this.keyProvider = keyProvider;
+        this.serverHelper = serverHelper;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -57,10 +52,7 @@ public class EchoController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public @ResponseBody String register(@RequestParam("id") String keyId, @RequestParam("type") String type, @RequestBody String publicKeyPem) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-        byte [] keyData = new PemReader(new StringReader(publicKeyPem)).readPemObject().getContent();
-        KeyFactory keyFactory = KeyFactory.getInstance(type);
-        PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(keyData));
-        keyProvider.put(keyId, publicKey);
+        keyProvider.put(keyId, serverHelper.readKey(type, publicKeyPem));
         return "OK";
     }
 

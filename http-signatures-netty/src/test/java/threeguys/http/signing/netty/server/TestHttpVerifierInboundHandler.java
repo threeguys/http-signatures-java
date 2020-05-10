@@ -50,7 +50,7 @@ public class TestHttpVerifierInboundHandler {
                 .add("Content-MD5", "some-hash-value")
                 .add("Host", "foo.com");
 
-        handler.channelRead0(context, msg);
+        handler.channelRead(context, msg);
         ArgumentCaptor<String> methodCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> uriCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<HeaderProvider> providerCaptor = ArgumentCaptor.forClass(HeaderProvider.class);
@@ -74,7 +74,7 @@ public class TestHttpVerifierInboundHandler {
         HttpVerifierInboundHandler handler = new HttpVerifierInboundHandler(verifier);
         ChannelHandlerContext context = mock(ChannelHandlerContext.class);
         DefaultFullHttpRequest msg = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/unit/test");
-        handler.channelRead0(context, msg);
+        handler.channelRead(context, msg);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class TestHttpVerifierInboundHandler {
         HttpVerifier verifier = mock(HttpVerifier.class);
         HttpVerifierInboundHandler handler = new HttpVerifierInboundHandler(verifier);
         ChannelHandlerContext context = mock(ChannelHandlerContext.class);
-        handler.channelRead0(context, new DefaultHttpContent(Unpooled.wrappedBuffer(new byte[]{ 42 })));
+        handler.channelRead(context, new DefaultHttpContent(Unpooled.wrappedBuffer(new byte[]{ 42 })));
 
         verify(verifier, times(0)).verify(anyString(), anyString(), any());
     }
@@ -127,17 +127,6 @@ public class TestHttpVerifierInboundHandler {
 
         ArgumentCaptor<Object> objCaptor = ArgumentCaptor.forClass(Object.class);
         verify(context, times(0)).writeAndFlush(objCaptor.capture());
-    }
-
-    @Test
-    public void acceptMessage() throws Exception {
-        HttpVerifier verifier = mock(HttpVerifier.class);
-        HttpVerifierInboundHandler handler = new HttpVerifierInboundHandler(verifier);
-
-        assertFalse(handler.acceptInboundMessage(13));
-        assertFalse(handler.acceptInboundMessage(new DefaultHttpContent(Unpooled.wrappedBuffer("dude".getBytes()))));
-        assertFalse(handler.acceptInboundMessage(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)));
-        assertTrue(handler.acceptInboundMessage(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/yo")));
     }
 
 }
