@@ -65,10 +65,6 @@ public class HttpVerifierImpl implements HttpVerifier {
         return signing;
     }
 
-    public KeyProvider<PublicKey> getKeyProvider() {
-        return keyProvider;
-    }
-
     public long getMaxCreateAgeSec() {
         return maxCreateAgeSec;
     }

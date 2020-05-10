@@ -9,14 +9,14 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.util.stream.Collectors;
 
 public class EchoClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
-    private static final Log log = LogFactory.getLog(EchoClientHandler.class);
+    private static final InternalLogger log = InternalLoggerFactory.getInstance(EchoClientHandler.class);
 
     private StringBuilder data = new StringBuilder();
 
@@ -45,7 +45,7 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<HttpObject> {
             }
 
             if (msg instanceof LastHttpContent) {
-                log.info("RESPONSE: " + data.toString());
+                log.info("==> BEGIN RESPONSE <==\n" + data.toString() + "==> END RESPONSE <==\n");
             }
         }
     }

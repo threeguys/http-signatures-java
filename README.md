@@ -30,19 +30,23 @@ implementations (obviously not in java). The main <a href="http-signatures">http
 maintained as dependency-free as possible, currently there are zero runtime dependencies. The only real reason to
 include more dependencies here would be broader algorithm support beyond what's provided in the JVM. 
 
-## Examples: Spring Boot
+## Examples: http-signature-examples
+
+#### Spring Boot
 There's an example echo server that will validate signed requests under
-<a href="examples/echo-spring-boot-server">examples/echo-spring-boot-server</a> and a client that will
+<a href="http-signature-examples/echo-spring-boot-server">echo-spring-boot-server</a> and a client that will
 register itself and make varying types of request, according to command line parameters under
-<a href="examples/echo-spring-client">examples/echo-spring-client</a>. 
+<a href="http-signature-examples/echo-spring-boot-client">echo-spring-boot-client</a>.
+
+#### Netty
+Example server: <a href="http-signature-examples/echo-netty-server">echo-netty-server</a>
+Example client: <a href="http-signature-examples/echo-netty-client">echo-netty-client</a> 
 
 # Roadmap
 My tentative plans are as follow:
 * Fully test and document <a href="http-signatures">http-signatures</a>
-* Clean up spring boot
-* Add Netty support
-* Add servlet example
 * Write up on how to use this to make your service secure
+* Add DynamoDb KeyProvider implementation for server-side public key management
 
 # License
 

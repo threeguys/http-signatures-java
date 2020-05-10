@@ -2,15 +2,11 @@
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 package threeguys.http.signing.examples.echo.client;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.PEMUtil;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,10 +26,7 @@ import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 
-@Component
 public class KeyHelper {
-
-    private static final Log log = LogFactory.getLog(KeyHelper.class);
 
     byte[] readAllBytes(InputStream in) throws IOException {
         ByteArrayOutputStream baos= new ByteArrayOutputStream();
@@ -56,7 +49,6 @@ public class KeyHelper {
     }
 
     public PrivateKey loadPrivateKey(String prefix) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeySpecException, InvalidAlgorithmParameterException {
-        log.info("Key prefix: " + prefix);
         Security.addProvider(new BouncyCastleProvider());
 
         File publicKeyFile = getPublicKeyFile(prefix);
@@ -64,9 +56,8 @@ public class KeyHelper {
         boolean generateKeys = !publicKeyFile.exists() || !privateKeyFile.exists();
 
         if (generateKeys && (publicKeyFile.exists() || privateKeyFile.exists())) {
-            log.error("Keys " + privateKeyFile.getName() + ":" + privateKeyFile.exists()
+            throw new RuntimeException("Must have both or neither key file! Keys " + privateKeyFile.getName() + ":" + privateKeyFile.exists()
                     + ", " + publicKeyFile.getName() + ":" + publicKeyFile.exists() );
-            throw new RuntimeException("Must have both or neither key file!");
         }
 
         KeyPair pair;
@@ -78,12 +69,10 @@ public class KeyHelper {
             JcaPEMWriter pw = new JcaPEMWriter(new FileWriter(privateKeyFile));
             pw.writeObject(pair.getPrivate());
             pw.close();
-            log.info("Wrote private key: " + privateKeyFile.getName());
 
             pw = new JcaPEMWriter(new FileWriter(publicKeyFile));
             pw.writeObject(pair.getPublic());
             pw.close();
-            log.info("Wrote public key: " + publicKeyFile.getName());
 
         } else {
             PEMParser parser = new PEMParser(new FileReader(privateKeyFile));

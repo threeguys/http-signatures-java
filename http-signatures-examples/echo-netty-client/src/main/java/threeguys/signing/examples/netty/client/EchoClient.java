@@ -22,8 +22,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import threeguys.http.signing.HttpSigner;
 import threeguys.http.signing.HttpSignerImpl;
 import threeguys.http.signing.Signatures;
@@ -42,21 +40,17 @@ import java.util.Base64;
 
 public class EchoClient {
 
-    private static final Log log = LogFactory.getLog(EchoClient.class);
-
     private final SimplePrivateKeyProvider privateKeyProvider;
     private final KeyHelper keyHelper;
     private final HttpSigningOutboundHandler signer;
     private final ClientInfo info;
-    private final Gson gson;
     private final String keyId;
 
-    public EchoClient(SimplePrivateKeyProvider privateKeyProvider, KeyHelper keyHelper, HttpSigningOutboundHandler signer, ClientInfo info, Gson gson, String keyId) {
+    public EchoClient(SimplePrivateKeyProvider privateKeyProvider, KeyHelper keyHelper, HttpSigningOutboundHandler signer, ClientInfo info, String keyId) {
         this.privateKeyProvider = privateKeyProvider;
         this.keyHelper = keyHelper;
         this.signer = signer;
         this.info = info;
-        this.gson = gson;
         this.keyId = keyId;
     }
 
@@ -148,7 +142,6 @@ public class EchoClient {
     public static void main(String [] args) throws Exception {
         String keyId = ClientOptions.setKeyId();
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         SimplePrivateKeyProvider keyProvider = new SimplePrivateKeyProvider(null);
 
         HttpSigner signer = new HttpSignerImpl(Clock.systemUTC(),
@@ -158,11 +151,11 @@ public class EchoClient {
                                                 new Signatures(),
                                                 30);
 
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         EchoClient client = new EchoClient(keyProvider,
                                             new KeyHelper(),
                                             new HttpSigningOutboundHandler(signer),
                                             new ClientInfo(gson, keyId),
-                                            gson,
                                             keyId);
         client.run(args);
     }
