@@ -15,6 +15,7 @@
  */
 package threeguys.http.signing.spring;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -159,6 +161,7 @@ public class IntegrationTest extends SpringBootServletInitializer {
 
     @Test
     public void something() {
+        Security.addProvider(new BouncyCastleProvider());
         assertNotNull(controller);
         assertNotNull(restTemplate);
 
@@ -166,12 +169,7 @@ public class IntegrationTest extends SpringBootServletInitializer {
 
         RestTemplate exec = restTemplate.getRestTemplate();
         exec.getInterceptors().add(interceptor);
-        exec.getClientHttpRequestInitializers().add(new ClientHttpRequestInitializer() {
-            @Override
-            public void initialize(ClientHttpRequest request) {
-                request.getHeaders().add("X-Foo-Id", myFooId);
-            }
-        });
+        exec.getClientHttpRequestInitializers().add(request -> request.getHeaders().add("X-Foo-Id", myFooId));
 
         String response = exec.getForObject("http://localhost:" + port + "/?name=dude", String.class);
         assertEquals("Hello, dude!", response);

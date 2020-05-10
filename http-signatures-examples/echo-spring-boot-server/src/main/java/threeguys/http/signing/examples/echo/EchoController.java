@@ -1,23 +1,12 @@
-/**
- *    Copyright 2020 Ray Cole
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+/** Any copyright is dedicated to the Public Domain.
+ * https://creativecommons.org/publicdomain/zero/1.0/ */
 package threeguys.http.signing.examples.echo;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +20,7 @@ import threeguys.http.signing.examples.server.InMemoryKeyProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -66,10 +56,10 @@ public class EchoController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public @ResponseBody String register(@RequestParam("id") String keyId, @RequestBody String publicKeyPem) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyPem));
-        KeyFactory keyFactory = KeyFactory.getInstance("EC");
-        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+    public @ResponseBody String register(@RequestParam("id") String keyId, @RequestParam("type") String type, @RequestBody String publicKeyPem) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+        byte [] keyData = new PemReader(new StringReader(publicKeyPem)).readPemObject().getContent();
+        KeyFactory keyFactory = KeyFactory.getInstance(type);
+        PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(keyData));
         keyProvider.put(keyId, publicKey);
         return "OK";
     }

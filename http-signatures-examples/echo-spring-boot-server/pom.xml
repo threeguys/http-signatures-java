@@ -24,7 +24,7 @@
 
         <dependency>
             <groupId>threeguys.http.signatures</groupId>
-            <artifactId>echo-server-common</artifactId>
+            <artifactId>echo-common-server</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -36,6 +36,11 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
 
     </dependencies>

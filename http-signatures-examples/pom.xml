@@ -17,7 +17,9 @@
         <module>echo-spring-boot-server</module>
         <module>echo-spring-client</module>
         <module>echo-netty-server</module>
-        <module>echo-server-common</module>
+        <module>echo-common-server</module>
+        <module>echo-netty-client</module>
+        <module>echo-common-client</module>
     </modules>
 
     <dependencyManagement>

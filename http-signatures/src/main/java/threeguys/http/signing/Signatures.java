@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 public class Signatures {
 
-    public static final String DEFAULT_ALGORITHM = "rsa-sha512";
+    public static final String DEFAULT_ALGORITHM = "ecdsa-sha512";
 
     public static final String HEADER = "Signature";
 
@@ -58,7 +58,7 @@ public class Signatures {
     private final String defaultAlgorithm;
 
     public Signatures() {
-        this("rsa-sha512", SigningAlgorithms.defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
+        this(DEFAULT_ALGORITHM, SigningAlgorithms.defaultAlgorithms(), defaultFields(), defaultHeadersToInclude());
     }
 
     public Signatures(String defaultAlgorithm, Map<String, SigningAlgorithm> algorithms, List<String> fields, List<String> headersToInclude) {

@@ -26,6 +26,7 @@
         <spring.framework.version>5.2.5.RELEASE</spring.framework.version>
         <spring.boot.version>2.2.6.RELEASE</spring.boot.version>
         <netty.version>4.1.49.Final</netty.version>
+        <bouncycastle.version>1.65</bouncycastle.version>
     </properties>
 
     <dependencyManagement>
@@ -35,6 +36,18 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${javax.servlet.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jcl</artifactId>
+                <version>${spring.framework.version}</version>
             </dependency>
 
             <dependency>
@@ -101,6 +114,18 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
                 <version>${netty.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
             </dependency>
 
         </dependencies>
