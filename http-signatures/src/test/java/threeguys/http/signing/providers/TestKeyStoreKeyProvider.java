@@ -22,13 +22,23 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.KeyStoreSpi;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+
+import static org.mockito.Mockito.*;
 
 import static org.junit.Assert.assertEquals;
 

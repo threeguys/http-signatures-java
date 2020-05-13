@@ -13,20 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package threeguys.http.signing.exceptions;
+package threeguys.http.signing.providers.cache;
 
-public class KeyNotFoundException extends SignatureException {
+import threeguys.http.signing.exceptions.KeyNotFoundException;
 
-    public KeyNotFoundException(String message) {
-        super(message);
-    }
+import java.security.Key;
 
-    public KeyNotFoundException(Throwable cause) {
-        super(cause);
-    }
-
-    public KeyNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+@FunctionalInterface
+public interface CacheLoader<K,E extends Key> {
+    CacheEntry<E> load(K key) throws KeyNotFoundException;
 }

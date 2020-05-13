@@ -49,6 +49,8 @@ public class TestExceptions {
     public void keyNotFoundException() throws Exception {
         Exception ex = new IllegalArgumentException();
         assertEquals(ex, new KeyNotFoundException(ex).getCause());
+        assertEquals("here's your message", new KeyNotFoundException("here's your message", null).getMessage());
+        assertEquals(ex, new KeyNotFoundException("test", ex).getCause());
         checkException("test-message-4", new KeyNotFoundException("test-message-4"));
     }
 
