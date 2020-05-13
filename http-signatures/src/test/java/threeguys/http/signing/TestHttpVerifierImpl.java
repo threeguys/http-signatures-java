@@ -16,8 +16,8 @@
 package threeguys.http.signing;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 import threeguys.http.signing.providers.MockHeaderProvider;
 import threeguys.http.signing.providers.MockKeys;
 import threeguys.http.signing.providers.SimplePublicKeyProvider;
@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_HEADERS;
@@ -52,7 +52,7 @@ import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorit
 
 public class TestHttpVerifierImpl {
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());

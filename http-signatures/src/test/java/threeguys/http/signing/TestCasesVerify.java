@@ -19,9 +19,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.MockHeaderProvider;
 import threeguys.http.signing.providers.MockKeys;
@@ -36,21 +36,19 @@ import java.security.PublicKey;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static threeguys.http.signing.Signatures.DEFAULT_ALGORITHM;
 import static threeguys.http.signing.Signatures.defaultFields;
 import static threeguys.http.signing.Signatures.defaultHeadersToInclude;
 import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorithms;
 
 
-@RunWith(Parameterized.class)
 public class TestCasesVerify {
 
     // more than 1MB of signature in this test will fail
@@ -58,28 +56,15 @@ public class TestCasesVerify {
 
     private Gson gson = new GsonBuilder().create();
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { "test.public.pem", "full",    "rsa-sha256", "full" },
-                { "test.public.pem", "full",    "rsa-sha384", "full" },
-                { "test.public.pem", "full",    "rsa-sha512", "full" },
-                { "test.public.pem", "minimal", "rsa-sha256", "minimal" },
-                { "test.public.pem", "minimal", "rsa-sha384", "minimal" },
-                { "test.public.pem", "minimal", "rsa-sha512", "minimal" },
-        });
-    }
-
-    private final String keyName;
-    private final String caseName;
-    private final String algorithm;
-    private final String expectedKey;
-
-    public TestCasesVerify(String keyName, String caseName, String algorithm, String expectedKey) {
-        this.keyName = keyName;
-        this.caseName = caseName;
-        this.algorithm = algorithm;
-        this.expectedKey = expectedKey;
+    public static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of( "test.public.pem", "full",    "rsa-sha256", "full" ),
+                Arguments.of( "test.public.pem", "full",    "rsa-sha384", "full" ),
+                Arguments.of( "test.public.pem", "full",    "rsa-sha512", "full" ),
+                Arguments.of( "test.public.pem", "minimal", "rsa-sha256", "minimal" ),
+                Arguments.of( "test.public.pem", "minimal", "rsa-sha384", "minimal" ),
+                Arguments.of( "test.public.pem", "minimal", "rsa-sha512", "minimal" )
+        );
     }
 
     private Map<String, String> readMap(String path) {
@@ -100,6 +85,8 @@ public class TestCasesVerify {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("data")
     public void verify(String key, String name, String sigType, String expectedKey) throws IOException, SignatureException {
         PublicKey publicKey = MockKeys.classpathPublicKey(key);
         Map<String, String> headers = readMap("cases/" + name + "/headers.json");
@@ -120,11 +107,6 @@ public class TestCasesVerify {
         assertEquals(publicKey, result.getKey());
 
         assertEquals(new HashSet<>(Signatures.defaultFields()), result.getFields().keySet());
-    }
-
-    @Test
-    public void tests() throws IOException, SignatureException {
-        verify(keyName, caseName, algorithm, expectedKey);
     }
 
 }

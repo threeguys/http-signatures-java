@@ -15,9 +15,9 @@
  */
 package threeguys.http.signing;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import threeguys.http.signing.exceptions.SignatureException;
 
 import java.security.KeyPair;
@@ -25,41 +25,28 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(Parameterized.class)
 public class TestHttpVerifierAlgorithms {
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { "rsa-sha256", "RSA", 2048 },
-                { "rsa-sha384", "RSA", 2048 },
-                { "rsa-sha512", "RSA", 2048 },
-                { "ecdsa-sha256", "EC", 256 },
-                { "ecdsa-sha384", "EC", 384 },
-                { "ecdsa-sha512", "EC", 571 },
-        });
+    public static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of( "rsa-sha256", "RSA", 2048 ),
+                Arguments.of( "rsa-sha384", "RSA", 2048 ),
+                Arguments.of( "rsa-sha512", "RSA", 2048 ),
+                Arguments.of( "ecdsa-sha256", "EC", 256 ),
+                Arguments.of( "ecdsa-sha384", "EC", 384 ),
+                Arguments.of( "ecdsa-sha512", "EC", 571 )
+        );
     }
 
-    private String algorithm;
-    private String keyGenerator;
-    private int keySize;
-
-    public TestHttpVerifierAlgorithms(String algorithm, String keyGenerator, int keySize) {
-        this.algorithm = algorithm;
-        this.keyGenerator = keyGenerator;
-        this.keySize = keySize;
-    }
-
-    @Test
-    public void happyCase() throws NoSuchAlgorithmException, SignatureException {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void happyCase(String algorithm, String keyGenerator, int keySize) throws NoSuchAlgorithmException, SignatureException {
         KeyPairGenerator generator = KeyPairGenerator.getInstance(keyGenerator);
         generator.initialize(keySize, new SecureRandom());
         KeyPair pair = generator.generateKeyPair();
@@ -73,12 +60,12 @@ public class TestHttpVerifierAlgorithms {
         data.put("foo", new String[] { "foo value" });
         data.put("bar", new String[] { "is bar" });
         data.put("baz", new String[] { "was baz,bif,dude"});
-        String sig = signer.sign("GET", "/yo/mom", (name) -> data.get(name));
+        String sig = signer.sign("GET", "/yo/mom", data::get);
 
         data.put(Signatures.HEADER, new String[] { sig });
 
         HttpVerifier verifier = new HttpVerifierImpl(signing, (n) -> pair.getPublic());
-        VerificationResult result = verifier.verify("GET", "/yo/mom", (name) -> data.get(name));
+        VerificationResult result = verifier.verify("GET", "/yo/mom", data::get);
         assertNotNull(result);
     }
 

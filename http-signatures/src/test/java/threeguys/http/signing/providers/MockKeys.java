@@ -59,7 +59,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Locale;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MockKeys {
 

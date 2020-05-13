@@ -16,49 +16,37 @@
 package threeguys.http.signing.providers;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.KeyStoreSpi;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
 import java.security.Security;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestKeyStoreKeyProvider {
 
     private static final char [] DEFAULT_PASSWORD = "unit-test".toCharArray();
 
-    @Rule
-    public TemporaryFolder tempFolder;
-
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
-        Security.addProvider(new BouncyCastleProvider());
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
 
-    @Test(expected = KeyNotFoundException.class)
+    @Test
     public void keyNotFound() throws Exception {
         KeyStore keyStore = MockKeys.emptyStore();
         KeyProvider<PrivateKey> privateProvider = new KeyStoreKeyProvider(keyStore, DEFAULT_PASSWORD);
-        privateProvider.get("bar");
+        assertThrows(KeyNotFoundException.class, () -> privateProvider.get("bar"));
     }
 
     @Test

@@ -15,16 +15,14 @@
  */
 package threeguys.http.signing.servlet;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
-import threeguys.http.signing.Signatures;
 import threeguys.http.signing.algorithms.SigningAlgorithm;
 import threeguys.http.signing.algorithms.SigningAlgorithms;
 import threeguys.http.signing.exceptions.SignatureException;
@@ -36,6 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -44,13 +43,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-import static threeguys.http.signing.servlet.HttpSignatureVerifierFilter.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static threeguys.http.signing.servlet.HttpSignatureVerifierFilter.PARAM_ALGORITHMS;
+import static threeguys.http.signing.servlet.HttpSignatureVerifierFilter.PARAM_FIELDS;
+import static threeguys.http.signing.servlet.HttpSignatureVerifierFilter.PARAM_MAX_AGE;
 
 public class TestHttpSignatureVerifierFilter {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public Path tempFolder;
 
     @Test
     public void happyCase() throws IOException, ServletException {
@@ -67,8 +70,8 @@ public class TestHttpSignatureVerifierFilter {
         filter.destroy();
     }
 
-    @Test(expected = ServletException.class)
-    public void notHttpServletRequest() throws IOException, ServletException {
+    @Test
+    public void notHttpServletRequest() {
         ServletRequest request = (ServletRequest) Proxy.newProxyInstance(this.getClass().getClassLoader(),
                 new Class<?>[]{ServletRequest.class},
                 (proxy, method, args) -> null);
@@ -77,7 +80,7 @@ public class TestHttpSignatureVerifierFilter {
         MockFilterChain chain = new MockFilterChain();
 
         HttpSignatureVerifierFilter filter = new HttpSignatureVerifierFilter(new MockHttpVerifier());
-        filter.doFilter(request, response, chain);
+        assertThrows(ServletException.class, () -> filter.doFilter(request, response, chain));
     }
 
     @Test
@@ -101,12 +104,13 @@ public class TestHttpSignatureVerifierFilter {
     }
 
     @Test
-    public void goodConfig() throws IOException, ServletException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    public void goodConfig(@TempDir Path tempDir) throws IOException, ServletException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char [] password = "your-mom".toCharArray();
         ks.load(null, password);
 
-        File keyStoreFile = tempFolder.newFile();
+
+        File keyStoreFile = tempDir.resolve("keystore").toFile();
         try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
             ks.store(fos, password);
         }

@@ -12,6 +12,7 @@
     <artifactId>echo-common-server</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>threeguys.http.signatures</groupId>
             <artifactId>http-signatures</artifactId>

@@ -15,8 +15,7 @@
  */
 package threeguys.http.signing;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import threeguys.http.signing.exceptions.SignatureException;
 import threeguys.http.signing.providers.MockHeaderProvider;
 import threeguys.http.signing.providers.MockKeys;
@@ -31,7 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static threeguys.http.signing.Signatures.FIELD_CREATED;
 import static threeguys.http.signing.Signatures.FIELD_HEADERS;
 import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
@@ -196,8 +195,7 @@ public class RfcExamplesHttpVerifier {
                         "fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg==\"");
     }
 
-    @Ignore
-    @Test
+//    @Test
     public void verifyA311_hs2019_signature_over_minimal_recommended_content_rsapss_sha512() throws IOException, SignatureException {
         verify_signature_over_minimal_recommended_content("rsapss-sha512",
                 "keyId=\"test-key-a\", created=1402170695, " +

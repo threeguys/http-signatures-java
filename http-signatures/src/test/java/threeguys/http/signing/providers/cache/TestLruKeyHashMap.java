@@ -1,8 +1,7 @@
 package threeguys.http.signing.providers.cache;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import threeguys.http.signing.providers.MockKeys;
 
 import java.security.KeyPair;
@@ -13,7 +12,7 @@ import java.security.Security;
 import java.time.Clock;
 import java.time.ZoneId;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestLruKeyHashMap {
 

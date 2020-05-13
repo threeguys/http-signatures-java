@@ -15,7 +15,7 @@
  */
 package threeguys.http.signing.spring;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import threeguys.http.signing.VerificationResult;
@@ -27,7 +27,7 @@ import threeguys.http.signing.servlet.HttpSignatureVerifierFilter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static threeguys.http.signing.Signatures.FIELD_ALGORITHM;
 import static threeguys.http.signing.Signatures.FIELD_KEY_ID;
 

@@ -15,13 +15,13 @@
  */
 package threeguys.http.signing.servlet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import threeguys.http.signing.providers.HeaderProvider;
 
 import static threeguys.http.signing.Signatures.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestHttpServerRequestHeaderProvider {
 

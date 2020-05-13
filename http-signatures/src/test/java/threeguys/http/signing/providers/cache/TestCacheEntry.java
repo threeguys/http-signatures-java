@@ -1,8 +1,7 @@
 package threeguys.http.signing.providers.cache;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import threeguys.http.signing.providers.MockKeys;
 
 import java.security.KeyPair;
@@ -14,19 +13,20 @@ import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCacheEntry {
 
     private KeyPair pair;
 
     public TestCacheEntry() throws NoSuchProviderException, NoSuchAlgorithmException {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
         pair = MockKeys.newKeyPair("RSA", 2048);
-    }
-
-    @BeforeClass
-    public static void setup() {
-        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Test

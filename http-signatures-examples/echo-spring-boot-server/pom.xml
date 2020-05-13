@@ -61,16 +61,11 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-<!--                            <classpathPrefix>lib/</classpathPrefix>-->
                             <mainClass>threeguys.http.signing.examples.spring.EchoServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
-
-<!--            <plugin>-->
-<!--                <artifactId>maven-dependency-plugin</artifactId>-->
-<!--            </plugin>-->
 
             <plugin>
                 <groupId>com.spotify</groupId>

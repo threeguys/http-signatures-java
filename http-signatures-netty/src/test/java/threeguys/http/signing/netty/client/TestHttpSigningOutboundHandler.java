@@ -20,14 +20,14 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import threeguys.http.signing.HttpSigner;
 import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.HeaderProvider;
 
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestHttpSigningOutboundHandler {
 

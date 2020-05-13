@@ -20,12 +20,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpContent;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.exceptions.KeyNotFoundException;
@@ -34,8 +32,15 @@ import threeguys.http.signing.providers.HeaderProvider;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TestHttpVerifierInboundHandler {
 
@@ -67,14 +72,14 @@ public class TestHttpVerifierInboundHandler {
         }
     }
 
-    @Test(expected = KeyNotFoundException.class)
+    @Test
     public void channelRead_verifyFailed() throws Exception {
         HttpVerifier verifier = mock(HttpVerifier.class);
         when(verifier.verify(anyString(), anyString(), any())).thenThrow(new KeyNotFoundException("unit-test"));
         HttpVerifierInboundHandler handler = new HttpVerifierInboundHandler(verifier);
         ChannelHandlerContext context = mock(ChannelHandlerContext.class);
         DefaultFullHttpRequest msg = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/unit/test");
-        handler.channelRead(context, msg);
+        assertThrows(KeyNotFoundException.class, () -> handler.channelRead(context, msg));
     }
 
     @Test
