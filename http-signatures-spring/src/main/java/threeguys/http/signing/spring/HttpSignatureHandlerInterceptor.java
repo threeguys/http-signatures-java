@@ -15,24 +15,44 @@
  */
 package threeguys.http.signing.spring;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-import threeguys.http.signing.servlet.HttpSignatureVerifierFilter;
+import threeguys.http.signing.HttpVerifier;
+import threeguys.http.signing.exceptions.InvalidSignatureException;
+import threeguys.http.signing.exceptions.KeyNotFoundException;
+import threeguys.http.signing.exceptions.SignatureException;
+import threeguys.http.signing.servlet.HttpServletRequestHeaderProvider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class HttpSignatureHandlerInterceptor extends HandlerInterceptorAdapter {
 
-    private HttpSignatureVerifierFilter filter;
+    private static final Log log = LogFactory.getLog(HttpSignatureHandlerInterceptor.class);
+    private HttpVerifier verifier;
 
-    public HttpSignatureHandlerInterceptor(HttpSignatureVerifierFilter filter) {
+    public HttpSignatureHandlerInterceptor(HttpVerifier verifier) {
         super();
-        this.filter = filter;
+        this.verifier = verifier;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        return filter.doFilter(request);
+
+        try {
+            verifier.verify(request.getMethod(), request.getRequestURI(), new HttpServletRequestHeaderProvider(request));
+        } catch (InvalidSignatureException | KeyNotFoundException e) {
+            log.warn("Unauthorized request: " + request.getSession().getId(), e);
+            response.sendError(401, "Not Authorized");
+            return false;
+
+        } catch (SignatureException e) {
+            log.error("Error verifying request", e);
+            return false;
+        }
+
+        return true;
     }
 
 }

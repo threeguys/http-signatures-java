@@ -107,7 +107,9 @@ public class EchoClient implements CommandLineRunner {
         // This is a hack since we may have generated the key, just set it later
         privateKeyProvider.setKey(privKey);
 
-        register();
+        if (!this.opts.isSkipRegister()) {
+            register();
+        }
 
         String url = uriBuilder("/echo").toUriString();
         HttpEntity<String> response = client.postForEntity(url, createBody(info.getInfo(), "application/json"), String.class);
@@ -120,7 +122,7 @@ public class EchoClient implements CommandLineRunner {
     }
 
     public static void main(String [] args) throws UnknownHostException {
-        ClientOptions.setKeyId();
+//        ClientOptions.setKeyId();
         SpringApplication.run(new Class<?>[]{ EchoClient.class }, args);
     }
 

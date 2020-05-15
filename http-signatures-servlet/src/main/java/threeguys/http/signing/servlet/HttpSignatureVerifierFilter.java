@@ -17,6 +17,8 @@ package threeguys.http.signing.servlet;
 
 import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierBuilder;
+import threeguys.http.signing.exceptions.InvalidSignatureException;
+import threeguys.http.signing.exceptions.KeyNotFoundException;
 import threeguys.http.signing.exceptions.SignatureException;
 
 import javax.servlet.Filter;
@@ -93,9 +95,14 @@ public class HttpSignatureVerifierFilter implements Filter {
             HttpServletRequestHeaderProvider provider = new HttpServletRequestHeaderProvider(request);
             try {
                 verifier.verify(request.getMethod(), request.getRequestURI(), provider);
-            } catch (SignatureException e) {
+
+            } catch (InvalidSignatureException | KeyNotFoundException e) {
                 return false;
+
+            } catch (SignatureException e) {
+                throw new ServletException(e);
             }
+
         } else {
             throw new ServletException("Invalid request, cannot process " + servletRequest.getClass().getName());
         }

@@ -24,6 +24,7 @@ public class ClientOptions {
     public static final String PATH = "path";
     public static final String BODY = "body";
     public static final String FAMILY = "family";
+    public static final String SKIP_REGISTER = "noregister";
 
     public static final String DEFAULT_PATH = "/echo";
     public static final String DEFAULT_KEY = "echo-client";
@@ -37,6 +38,7 @@ public class ClientOptions {
     private final short port;
     private final String path;
     private final String body;
+    private final boolean skipRegister;
 
     private static String validOption(String option, List<String> valid) {
         if (!valid.contains(option)) {
@@ -73,6 +75,9 @@ public class ClientOptions {
                 .hasArg()
                 .desc("key family (RSA|EC)")
                 .build());
+        options.addOption(Option.builder(SKIP_REGISTER)
+                .desc("skip the call to /register")
+                .build());
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
@@ -83,6 +88,11 @@ public class ClientOptions {
         this.path = cmd.getOptionValue(PATH, DEFAULT_PATH);
         this.keyFamily = validOption(cmd.getOptionValue(FAMILY, DEFAULT_KEY_FAMILY), Arrays.asList("RSA", "EC"));
         this.body = cmd.getOptionValue(BODY, null);
+        this.skipRegister = cmd.hasOption(SKIP_REGISTER);
+    }
+
+    public String getKeyFamily() {
+        return keyFamily;
     }
 
     public String getKeyPrefix() {
@@ -107,6 +117,10 @@ public class ClientOptions {
 
     public boolean hasBody() {
         return body != null;
+    }
+
+    public boolean isSkipRegister() {
+        return skipRegister;
     }
 
     private static <T> T getOptionValue(CommandLine cmd, String option, T defaultValue) throws ParseException {

@@ -22,7 +22,6 @@ import threeguys.http.signing.HttpVerifier;
 import threeguys.http.signing.HttpVerifierImpl;
 import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.KeyProvider;
-import threeguys.http.signing.servlet.HttpSignatureVerifierFilter;
 import threeguys.http.signing.spring.HttpSignatureHandlerInterceptor;
 
 import java.security.PublicKey;
@@ -41,8 +40,7 @@ public class HttpVerifierConfiguration {
 
     @Bean
     public HttpSignatureHandlerInterceptor interceptor(HttpVerifier verifier) {
-        HttpSignatureVerifierFilter filter = new HttpSignatureVerifierFilter(verifier);
-        return new HttpSignatureHandlerInterceptor(filter);
+        return new HttpSignatureHandlerInterceptor(verifier);
     }
 
 }

@@ -17,7 +17,7 @@
         <dependency>
             <groupId>threeguys.http.signatures</groupId>
             <artifactId>http-signatures</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

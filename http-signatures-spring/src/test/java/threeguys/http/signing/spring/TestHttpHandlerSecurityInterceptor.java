@@ -41,7 +41,7 @@ public class TestHttpHandlerSecurityInterceptor {
 
         MockPublicKey key = new MockPublicKey();
         MockHttpVerifier verifier = new MockHttpVerifier(new VerificationResult(key, fields), null);
-        HttpSignatureHandlerInterceptor filter = new HttpSignatureHandlerInterceptor(new HttpSignatureVerifierFilter(verifier));
+        HttpSignatureHandlerInterceptor filter = new HttpSignatureHandlerInterceptor(verifier);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -52,14 +52,14 @@ public class TestHttpHandlerSecurityInterceptor {
     @Test
     public void invalidKeyError() throws Exception {
         MockHttpVerifier verifier = new MockHttpVerifier(null, new InvalidSignatureException("this-is-a-test"));
-        HttpSignatureHandlerInterceptor filter = new HttpSignatureHandlerInterceptor(new HttpSignatureVerifierFilter(verifier));
+        HttpSignatureHandlerInterceptor filter = new HttpSignatureHandlerInterceptor(verifier);
         assertFalse(filter.preHandle(new MockHttpServletRequest(), new MockHttpServletResponse(), null));
     }
 
     @Test
     public void genericError() throws Exception {
         MockHttpVerifier verifier = new MockHttpVerifier(null, new SignatureException("this-is-a-test"));
-        HttpSignatureHandlerInterceptor filter = new HttpSignatureHandlerInterceptor(new HttpSignatureVerifierFilter(verifier));
+        HttpSignatureHandlerInterceptor filter = new HttpSignatureHandlerInterceptor(verifier);
         assertFalse(filter.preHandle(new MockHttpServletRequest(), new MockHttpServletResponse(), null));
     }
 

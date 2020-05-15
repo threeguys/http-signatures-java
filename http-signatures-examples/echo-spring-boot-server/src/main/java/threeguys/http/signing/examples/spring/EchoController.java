@@ -27,26 +27,28 @@ public class EchoController {
 
     private final Gson gson;
     private final InMemoryKeyProvider keyProvider;
+    private final EchoGenerator generator;
 
-    public EchoController(@Autowired InMemoryKeyProvider keyProvider) {
+    public EchoController(@Autowired InMemoryKeyProvider keyProvider, @Autowired EchoGenerator generator) {
         this.keyProvider = keyProvider;
+        this.generator = generator;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
-    private void writeValues(JsonWriter writer, String name, String [] values) throws IOException {
-        if (values == null || values.length == 0) {
-            writer.name(name).value("");
-        } else if (values.length == 1) {
-            writer.name(name).value(values[0]);
-        } else {
-            writer.name(name).beginArray();
-            for (String v : values) {
-                writer.value(v);
-            }
-            writer.endArray();
-        }
-    }
-
+//    private void writeValues(JsonWriter writer, String name, String [] values) throws IOException {
+//        if (values == null || values.length == 0) {
+//            writer.name(name).value("");
+//        } else if (values.length == 1) {
+//            writer.name(name).value(values[0]);
+//        } else {
+//            writer.name(name).beginArray();
+//            for (String v : values) {
+//                writer.value(v);
+//            }
+//            writer.endArray();
+//        }
+//    }
+//
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public @ResponseBody String register(@RequestParam("id") String keyId, @RequestParam("type") String type, @RequestBody String publicKeyPem) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         keyProvider.put(keyId, type, publicKeyPem);
@@ -55,43 +57,44 @@ public class EchoController {
 
     @RequestMapping(value = "/echo", produces = "application/json")
     public @ResponseBody byte [] echo(WebRequest req) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(os));
-
-        writer.beginObject()
-            .name("user").value(req.getRemoteUser())
-            .name("secure").value(req.isSecure())
-            .name("sessionId").value(req.getSessionId())
-            .name("context").value(req.getContextPath())
-            .name("locale")
-                .beginObject()
-                    .name("country").value(req.getLocale().getCountry())
-                    .name("lang").value(req.getLocale().getLanguage())
-                    .name("script").value(req.getLocale().getScript())
-                .endObject();
-
-        writer.name("headers").beginObject();
-        for (Iterator<String> it = req.getHeaderNames(); it.hasNext(); ) {
-            String hdr = it.next();
-            writeValues(writer, hdr, req.getHeaderValues(hdr));
-        }
-        writer.endObject();
-
-
-        writer.name("params").beginObject();
-        for (Iterator<String> it = req.getParameterNames(); it.hasNext();) {
-            String param = it.next();
-            writeValues(writer, param, req.getParameterValues(param));
-        }
-        writer.endObject();
-
-        writer.endObject();
-
-        writer.flush();
-        os.write('\n');
-        writer.close();
-
-        return os.toByteArray();
+        return generator.echo(req);
+//        ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(os));
+//
+//        writer.beginObject()
+//            .name("user").value(req.getRemoteUser())
+//            .name("secure").value(req.isSecure())
+//            .name("sessionId").value(req.getSessionId())
+//            .name("context").value(req.getContextPath())
+//            .name("locale")
+//                .beginObject()
+//                    .name("country").value(req.getLocale().getCountry())
+//                    .name("lang").value(req.getLocale().getLanguage())
+//                    .name("script").value(req.getLocale().getScript())
+//                .endObject();
+//
+//        writer.name("headers").beginObject();
+//        for (Iterator<String> it = req.getHeaderNames(); it.hasNext(); ) {
+//            String hdr = it.next();
+//            writeValues(writer, hdr, req.getHeaderValues(hdr));
+//        }
+//        writer.endObject();
+//
+//
+//        writer.name("params").beginObject();
+//        for (Iterator<String> it = req.getParameterNames(); it.hasNext();) {
+//            String param = it.next();
+//            writeValues(writer, param, req.getParameterValues(param));
+//        }
+//        writer.endObject();
+//
+//        writer.endObject();
+//
+//        writer.flush();
+//        os.write('\n');
+//        writer.close();
+//
+//        return os.toByteArray();
     }
 
 }

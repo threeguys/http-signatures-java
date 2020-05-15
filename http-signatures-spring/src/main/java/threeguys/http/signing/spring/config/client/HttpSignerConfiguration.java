@@ -41,9 +41,12 @@ public class HttpSignerConfiguration {
     @Value("${signer.keyId}")
     private String keyId;
 
+    @Value("${signer.defaultAlgorithm}")
+    private String defaultAlgorithm;
+
     @Bean
     public HttpSigner signer(KeyProvider<PrivateKey> keyProvider, Signatures signatures) throws InvalidSignatureException {
-        return new HttpSignerImpl(Signatures.DEFAULT_ALGORITHM, keyId, keyProvider, signatures, expirationSec);
+        return new HttpSignerImpl(defaultAlgorithm, keyId, keyProvider, signatures, expirationSec);
     }
 
     @Bean

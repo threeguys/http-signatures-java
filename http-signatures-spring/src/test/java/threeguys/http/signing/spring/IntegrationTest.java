@@ -19,18 +19,14 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,7 +39,6 @@ import threeguys.http.signing.Signatures;
 import threeguys.http.signing.providers.KeyProvider;
 import threeguys.http.signing.providers.SimplePrivateKeyProvider;
 import threeguys.http.signing.providers.SimplePublicKeyProvider;
-import threeguys.http.signing.spring.config.SignaturesConfiguration;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -65,15 +60,16 @@ import static threeguys.http.signing.Signatures.defaultFields;
 import static threeguys.http.signing.algorithms.SigningAlgorithms.defaultAlgorithms;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = { "signer.keyId=" + IntegrationTest.INTEG_TEST_KEY_ID }
-)
-@Configuration
-@ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SignaturesConfiguration.class))
-@SpringBootApplication(excludeName = "threeguys.http.signing.spring.config.*")
-@ActiveProfiles("unit-test")
-public class IntegrationTest extends SpringBootServletInitializer {
+//@SpringBootTest(
+//        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+//        properties = { "signer.keyId=" + IntegrationTest.INTEG_TEST_KEY_ID }
+//)
+//@Configuration
+//@ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SignaturesConfiguration.class))
+//@SpringBootApplication(excludeName = "threeguys.http.signing.spring.config.*")
+//@ActiveProfiles("unit-test")
+@ContextConfiguration
+public class IntegrationTest {
 
     public static final String INTEG_TEST_KEY_ID = "integration-test-key-id";
 
